@@ -17,7 +17,7 @@ def ToggleSwitch(parameter_values=None):
     # Define molecular species.
     U = gillespy2.Species(name='U', initial_value=10)
     V = gillespy2.Species(name='V', initial_value=10)
-    model.add_species([U, V])
+    model.add_species([U, V]) 
 
     # Define reactions.
     cu = gillespy2.Reaction(name="r1", reactants={}, products={U:1},
