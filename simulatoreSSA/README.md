@@ -1,0 +1,1 @@
+Cartella del simulatore SSA
