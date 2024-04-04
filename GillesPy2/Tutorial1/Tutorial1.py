@@ -27,10 +27,11 @@ def Dimerization(parameter_values=None):
     r_p = gillespy2.Reaction(name="r_prova", rate=k_p, reactants={d:1, m:1}, products={p:1})
     r_e = gillespy2.Reaction(name="r_esempio", rate=k_p, reactants={p:1}, products={})
 
-    model.add_reaction([r_c, r_d, r_p, r_e])
+    model.add_reaction([r_e])
 
     # Set the timespan for the simulation.
-    tspan = gillespy2.TimeSpan.linspace(100, 101)
+    # t -> tempo della simulazione | num_points -> numero di punti che voglio avere nel tempo t
+    tspan = gillespy2.TimeSpan.linspace(t = 100, num_points = 101)
     model.timespan(tspan)
     return model
 
