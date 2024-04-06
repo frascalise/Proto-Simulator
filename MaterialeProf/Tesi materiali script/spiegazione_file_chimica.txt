@@ -1,0 +1,70 @@
+Il file della chimica è composto da:
+
+- l'elenco delle specie chimiche presenti nel sistema
+- l'elenco delle reazioni possibili (ivi inclusi gli eventi che definiscono l'ambiente, CSTR oppure protocellula)
+
+**** SPECIE CHIMICHE ****
+
+C	1.35E-16	0								
+A	1.00E-16	0.								
+B	1.00E-16	0.
+...      ...            ...
+
+Prima colonna: nome della specie
+Seconda colonna: concentrazione della specie (da noi diventerà il numero di molecole)
+Terza colonna: accoppiamento con il contenitore (discuteremo in seguito come fare)
+
+**** REAZIONI ****
+
+Seguono esempi di reazioni possibili
+NOTA BENE: Gli esempi sottostanti sono specializzati per chimiche di polimeri, ma in realtà i nomi delle specie chimiche possono essere stringhe qualsiasi (inclusi caratteri come "*")
+
+Condensazioni:
+A + B > AB ; 0.04
+AB + B > ABB ; 0.04
+
+Condensazioni catalizzate (AAA compare sia come reagente che come prodotto)
+A + B + AAA > AB + AAA ; 0.04
+
+Rotture (cleavages):
+ABB > A + BB ; 0.2
+
+Rotture (cleavages) catalizzate:
+ABB + BAB> A + BB + BAB ; 0.04
+ABB + ABB> A + BB + ABB ; 0.04  (in questa reazione ABB catalizza la propria rottura)
+
+Altre reazioni (scambio):
+A + B > C + D
+AA + BB > AB + BA
+
+
+AMBIENTI
+1) Per creare un CSTR (Continuously Stirred Tank Reactor) occorrono:
+
+1a. Ingresso di specie chimiche (dal "nulla")
+  >  A ; 1.0
+  >  B ; 1.0
+
+1.b Uscita di tutte le specie chimiche presenti nel sistema (verso il "nulla" - tutte con la medesima costante di reazione)
+A >  ; 0.05
+B >  ; 0.05
+AAA >  ; 0.05
+ABB >  ; 0.05
+BAB >  ; 0.05
+
+2) Per creare una protocellula occorre 
+
+1.a ... tenere conto del volume variabile. Questo si può fare attraverso il controllo delle costanti di reazione (che dipendono dal volume con modalità dipendenti dal numero di reagenti)
+
+2.b ... fare in modo che del materiale attraversi la membrana, in base alla situazione chimica interna. Il tutto avviene secondo la legge di Fick (gradiente di concentrazione) (URL: https://it.wikipedia.org/wiki/Leggi_di_Fick)
+
+Nel file della chimica il passaggio di membrana delle specie chimiche coinvolte viene scritto tramite la riga:
+10	>	A	;	1.00E-02
+
+che equivale a calcolare la differenza: 1.00E-02*(10-[A]).
+Tale reazione si può realizzare tramite la presenza contemporanea di 2 reazioni,
+          - una di immissione di sostanza 
+   > A  ; 1.00E-02*10
+           - ed una di uscita della sostanza
+A  >    ; 1.00E-02
+
