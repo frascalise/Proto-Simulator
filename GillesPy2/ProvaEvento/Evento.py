@@ -1,6 +1,6 @@
 #   SPECIE: [ A (20) | B (30) | C (40) ]
 #      
-#   FREQUENZE: [ k_add (1.00) | k_remove (0.05) |  |  |  ]      
+#   FREQUENZE: [ k_add (1.00) | k_remove (0.05) | k_ab (0.01) | k_ac (0.01) | k_bc (0.01) | k_abc (1.00) | k_acb (1.00) | k_bca (1.00) ]      
 #   
 #   CSTR:
 #       • > A   k_add
@@ -25,7 +25,7 @@ import gillespy2
 import matplotlib.pyplot as plt
 
     
-def protoZero(parameter_values=None):
+def protoZero(parameter_values = None):
     
     # Inizializzo il modello
     model = gillespy2.Model()
@@ -76,18 +76,18 @@ def protoZero(parameter_values=None):
     # -------------- EVENTI --------------
     trig = gillespy2.EventTrigger(expression = "AB < 50")       # L'evento si attiva non appena questa espressione diventa FALSA (si triggera)
     evento1 = gillespy2.EventAssignment(variable = "AB", expression = "AB/2")
-    e_div = gillespy2.Event(name = "e_div", assignments = [evento1] , trigger=trig)
+    e_div = gillespy2.Event(name = "e_div", assignments = [evento1] , trigger = trig)
 
     model.add_event([e_div])
 
     # Set the timespan for the simulation.
-    tspan = gillespy2.TimeSpan.linspace(t=2000, num_points=2001)
+    tspan = gillespy2.TimeSpan.linspace(t = 2000, num_points = 2001)
     model.timespan(tspan)
     return model
 
 n_lanci=1 # Numero lanci da fare
 model = protoZero()
-results = model.run(number_of_trajectories=n_lanci)
+results = model.run(number_of_trajectories = n_lanci)
 
 for index in range(0, n_lanci):
     trajectory = results[index]
