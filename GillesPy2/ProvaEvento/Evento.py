@@ -18,7 +18,7 @@
 #   ROTTURE CATALIZZATE:
 #       • AB + C > A + B + C    k_abc
 #       • AC + B > A + C + B    k_acb
-#       • BC + A > B + C + A    k_bca
+#       • BC + A > B + C + A    k_bca 
 #
 
 import gillespy2
