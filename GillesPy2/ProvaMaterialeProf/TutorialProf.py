@@ -59,5 +59,5 @@ for index in range(0, n_lanci):
     plt.plot(trajectory['time'], trajectory['C'], 'red')
     plt.plot(trajectory['time'], trajectory['X'],   'green')
 
-plt.title("Esempio GillesPy")
+plt.title("Esempio GillesPy") 
 plt.show()
