@@ -1,26 +1,3 @@
-#   SPECIE: [ A (20) | B (30) | C (40) ]
-#      
-#   FREQUENZE: [ k_add (1.00) | k_remove (0.05) | k_ab (0.01) | k_ac (0.01) | k_bc (0.01) | k_abc (1.00) | k_acb (1.00) | k_bca (1.00) ]      
-#   
-#   CSTR:
-#       • > A   k_add
-#       • > B   k_add
-#       • > C   k_add
-#       • A >   k_remove
-#       • B >   k_remove
-#       • C >   k_remove
-#
-#   CONDENSAZIONI:
-#       • A + B > AB    k_ab
-#       • A + C > AC    k_ac
-#       • B + C > BC    k_bc
-#
-#   ROTTURE CATALIZZATE:
-#       • AB + C > A + B + C    k_abc
-#       • AC + B > A + C + B    k_acb
-#       • BC + A > B + C + A    k_bca 
-#
-
 import gillespy2
 import matplotlib.pyplot as plt
 
@@ -30,52 +7,75 @@ def protoZero(parameter_values = None):
     # Inizializzo il modello
     model = gillespy2.Model()
 
-    # --------------- SPECIE ---------------
-    a = gillespy2.Species(name = 'A', initial_value = 100)
-    b = gillespy2.Species(name = 'B', initial_value = 100)
-    c = gillespy2.Species(name = 'C', initial_value = 100)
-    ab = gillespy2.Species(name = 'AB', initial_value = 0)
-    ac = gillespy2.Species(name = 'AC', initial_value = 0)
-    bc = gillespy2.Species(name = 'BC', initial_value = 0)
+    with open('chimica.txt', 'r') as file:
+        lines = file.readlines()
+    
+    # Inizializzo gli che conterranno tutte le informazioni lette da chimica.txt
+    species = [] 
+    frequences = []
+    reactions = []
 
-    model.add_species([a, b, c, ab, ac, bc])
+    readSpecies = True  # Quanto incontrerò la riga che separa le specie dalle reazioni diventerà False
+    reactionCounter = 0 # Conto le reazioni che vengono inserite dal file chimica.txt
 
-    # ---------- FREQUENZA REAZIONI ----------
-    k_add = gillespy2.Parameter(name = 'k_add', expression = 1.0)
-    k_remove = gillespy2.Parameter(name = 'k_remove', expression = 0.05)
-    k_ab = gillespy2.Parameter(name = 'k_ab', expression = 0.01)
-    k_ac = gillespy2.Parameter(name = 'k_ac', expression = 0.01)
-    k_bc = gillespy2.Parameter(name = 'k_bc', expression = 0.01)
-    k_abc = gillespy2.Parameter(name = 'k_abc', expression = 1)
-    k_acb = gillespy2.Parameter(name = 'k_acb', expression = 1)
-    k_bca = gillespy2.Parameter(name = 'k_bca', expression = 1)
+    dummy_species = gillespy2.Species(name = "dummy", initial_value = 10000000000)
+    species.append(dummy_species)
 
-    model.add_parameter([k_add, k_remove, k_ab, k_ac, k_bc, k_abc, k_acb, k_bca])
+    for line in lines: 
+        columns = line.split('\t')                  # Divido la riga in colonne usando tab come separatore 
+        columns = [col.strip() for col in columns]  # Rimuovo i caratteri di inizio/fine riga
 
-    # --------------- REAZIONI ---------------
-    #  CSTR 
-    r_Aadd = gillespy2.Reaction(name = "r_Aadd", reactants = {}, products = {a:1}, rate = "k_add")
-    r_Badd = gillespy2.Reaction(name = "r_Badd", reactants = {}, products = {b:1}, rate = "k_add")
-    r_Cadd = gillespy2.Reaction(name = "r_Cadd", reactants = {}, products = {c:1}, rate = "k_add")
-    r_Aremove = gillespy2.Reaction(name = "r_Aremove", reactants = {a:1}, products = {}, rate = "k_remove")
-    r_Bremove = gillespy2.Reaction(name = "r_Bremove", reactants = {b:1}, products = {}, rate = "k_remove")
-    r_Cremove = gillespy2.Reaction(name = "r_Cremove", reactants = {c:1}, products = {}, rate = "k_remove")
+        if len(columns) < 2:                        # Se la riga è vuota allora la skippo
+            readSpecies = False
+            continue
+        
+        if readSpecies:                             # Leggo specie dell'ambiente dal file e le salvo in 'species[]'
+            species.append(gillespy2.Species(name = columns[0], initial_value = int(columns[1])))
 
-    #  CONDENSAZIONI 
-    r_ab = gillespy2.Reaction(name = "r_ab", reactants = {a:1, b:1}, products = {ab:1}, rate = "k_ab")
-    r_ac = gillespy2.Reaction(name = "r_ac", reactants = {a:1, c:1}, products = {ac:1}, rate = "k_ac")
-    r_bc = gillespy2.Reaction(name = "r_bc", reactants = {b:1, c:1}, products = {bc:1}, rate = "k_bc")
+        else:                                       # Poi leggo le reazioni e le loro frequenze
+            reactants = []
+            products = []
 
-    #  ROTTURE CATALIZZATE 
-    r_abc = gillespy2.Reaction(name = "r_abc", reactants = {ab:1, c:1}, products = {a:1, b:1, c:1}, propensity_function = "k_abc")
-    r_acb = gillespy2.Reaction(name = "r_acb", reactants = {ac:1, b:1}, products = {a:1, c:1, b:1}, propensity_function = "k_acb")
-    r_bca = gillespy2.Reaction(name = "r_bca", reactants = {bc:1, a:1}, products = {b:1, c:1, a:1}, propensity_function = "k_bca")
+            arrowFound = False      # Se ho trovato il carattere '>'
+            semicolonFound = False  # Se ho trovato il carattere ';'
 
-    model.add_reaction([r_Aadd, r_Badd, r_Cadd, r_Aremove, r_Bremove, r_Cremove, r_ab, r_ac, r_bc, r_abc, r_acb, r_bca])
+            for i in columns:
+                if i == '>':
+                    arrowFound = True
+                elif i == ';':
+                    semicolonFound = True
+                elif semicolonFound:
+                    frequence = float(i)
+                elif arrowFound and i != '+': 
+                    products.append(i)
+                elif not arrowFound and i != '' and i != '+':
+                    reactants.append(i)
 
-    # -------------- EVENTI --------------
-    trig = gillespy2.EventTrigger(expression = "AB < 50")       # L'evento si attiva non appena questa espressione diventa FALSA (si triggera)
-    evento1 = gillespy2.EventAssignment(variable = "AB", expression = "AB/2")
+            frequences.append(gillespy2.Parameter(name = 'k' + str(reactionCounter), expression = frequence))
+
+            # FIXME: Sostituire 'propensity_function' con 'rate' e cercare di eliminare 'dummy_species'
+            # IDEA: Provare ad aggiungere alla fine della riga '.add_reactant()' 
+            reaction = gillespy2.Reaction(name = 'r' + str(reactionCounter), reactants = {dummy_species:1}, products = {}, rate = frequences[reactionCounter])
+
+            for i in reactants:
+                reaction.add_reactant(species=i, stoichiometry=1)
+            for i in products:
+                reaction.add_product(species=i, stoichiometry=1)
+
+            print(reaction)
+            reactions.append(reaction)
+
+            reactionCounter = reactionCounter + 1
+    
+    for i in species:
+        print("Nome: ", i.name, "\tQuantità: ", i.initial_value)
+
+    model.add_species(species)
+    model.add_parameter(frequences)
+    model.add_reaction(reactions)
+
+    trig = gillespy2.EventTrigger(expression = "A > 500")       # L'evento si attiva quando l'espressione diventa FALSO (da VERO) o VERO (da Falso)
+    evento1 = gillespy2.EventAssignment(variable = "A", expression = "A/2")
     e_div = gillespy2.Event(name = "e_div", assignments = [evento1] , trigger = trig)
 
     model.add_event([e_div])
@@ -94,9 +94,9 @@ for index in range(0, n_lanci):
     plt.plot(trajectory['time'], trajectory['A'], 'red', label = 'A')
     plt.plot(trajectory['time'], trajectory['B'], 'green', label = 'B')
     plt.plot(trajectory['time'], trajectory['C'], 'orange', label = 'C')
-    plt.plot(trajectory['time'], trajectory['AB'], 'purple', label = 'AB')
-    plt.plot(trajectory['time'], trajectory['AC'], 'blue', label = 'AC')
-    plt.plot(trajectory['time'], trajectory['BC'], 'yellow', label = 'BC')
+    plt.plot(trajectory['time'], trajectory['AB'], 'blue', label = 'AB')
+    plt.plot(trajectory['time'], trajectory['AC'], 'yellow', label = 'AC')
+    plt.plot(trajectory['time'], trajectory['BC'], 'purple', label = 'BC')
 
 plt.legend()
 plt.title("Esempio GillesPy") 
