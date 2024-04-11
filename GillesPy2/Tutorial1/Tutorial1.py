@@ -24,7 +24,7 @@ def Dimerization(parameter_values=None):
     # species in the reaction.
     r_c = gillespy2.Reaction(name="r_creation", rate=k_c, reactants={m:2}, products={d:1})
     r_d = gillespy2.Reaction(name="r_dissociation", rate=k_d, reactants={d:1}, products={m:2})
-    r_p = gillespy2.Reaction(name="r_prova", rate=k_p, reactants={d:1, m:1}, products={p:1})
+    r_p = gillespy2.Reaction(name="r_prova", rate=k_p, reactants={d:1, m:1, p:1}, products={p:1})
     r_e = gillespy2.Reaction(name="r_esempio", rate=k_p, reactants={p:1}, products={})
 
     model.add_reaction([r_e])
