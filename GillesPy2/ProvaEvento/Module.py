@@ -12,9 +12,6 @@ def protoZero(species, frequences, reactions):
     readSpecies = True  # Quanto incontrerò la riga che separa le specie dalle reazioni diventerà False
     reactionCounter = 0 # Conto le reazioni che vengono inserite dal file chimica.txt
 
-    dummy_species = gillespy2.Species(name = "dummy", initial_value = 10000000000)
-    species.append(dummy_species)
-
     for line in lines: 
         columns = line.split('\t')                  # Divido la riga in colonne usando tab come separatore 
         columns = [col.strip() for col in columns]  # Rimuovo i caratteri di inizio/fine riga
@@ -50,14 +47,22 @@ def protoZero(species, frequences, reactions):
 
             # FIXME: Sostituire 'propensity_function' con 'rate' e cercare di eliminare 'dummy_species'
             # IDEA: Aggiungere 'reactants' e 'products' con un for unendolo ai due for sotto.
-            #       Se i 'reactants' sono vuori allora inizializzo la reazione con il products e poi faccio 
+            #       Se i 'reactants' sono vuoti allora inizializzo la reazione con il products e poi faccio 
             #       'add_product()' e 'add_reactant()'
-            reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
-                                            reactants = {}, 
-                                            products = {dummy_species:1}, 
-                                            propensity_function = str(frequences[reactionCounter].name))
 
-
+            if reactants:
+                reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
+                                                reactants = {reactants[0]:1}, 
+                                                products = {}, 
+                                                propensity_function = str(frequences[reactionCounter].name))
+                reactants.pop(0)
+            elif products:
+                reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
+                                                reactants = {}, 
+                                                products = {products[0]:1}, 
+                                                propensity_function = str(frequences[reactionCounter].name))
+                products.pop(0)
+                
             for i in reactants:
                 reaction.add_reactant(species=i, stoichiometry=1)
             for i in products:
