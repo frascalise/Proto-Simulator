@@ -1,8 +1,4 @@
 import gillespy2
-import matplotlib.pyplot as plt
-import xlsxwriter
-import Module
-
 
 
 def protoZero(species, frequences, reactions):
