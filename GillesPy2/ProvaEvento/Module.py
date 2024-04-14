@@ -6,7 +6,7 @@ def protoZero(species, frequences, reactions):
     # Inizializzo il modello
     model = gillespy2.Model()
 
-    with open('chimica3.txt', 'r') as file:
+    with open('chimica.txt', 'r') as file:
         lines = file.readlines()
     
     readSpecies = True  # Quanto incontrerò la riga che separa le specie dalle reazioni diventerà False
