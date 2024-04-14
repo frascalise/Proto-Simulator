@@ -1,0 +1,33 @@
+A	30
+B	10
+AA	60
+AB	20	
+BA	20
+BB	20
+AAA	10
+BAB	10
+AAB	10
+BBBB	20
+AAAB	30
+AABB	20
+BABA	20
+
+	>	A	;	1.0
+	>	B	;	1.0
+	>	AA	;	1.0
+	>	AB	;	1.0
+	>	BA	;	1.0
+	>	BB	;	1.0
+A	>	;	1.0
+B	>	;	1.0
+AA	>	;	1.0
+AB	>	;	1.0
+BA	>	;	1.0
+BB	>	;	1.0
+BA	+	BA	+	AABB	>	BABA	+	AABB	;	0.1
+A	+	A	+	BABA	>	AAA	+	BABA	;	0.1
+B	+	AB	+	AAA	>	BAB	+	AAA	;	0.1
+BB	+	BB	+	BAB	>	BBBB	+	BAB	;	0.1
+BB	+	AA	+	BBBB	>	AABB	+	BBBB	;	0.1
+A	+	AAB	+	AAB	>	AAAB	+	AAB	;	0.1
+B	+	AA	+	AAAB	>	AAB	+	AAAB	;	0.1
