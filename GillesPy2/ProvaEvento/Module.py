@@ -87,6 +87,6 @@ def protoZero(species, frequences, reactions):
     model.add_event([e_div])
 
     # Set the timespan for the simulation.
-    tspan = gillespy2.TimeSpan.linspace(t = 100, num_points = 101)
+    tspan = gillespy2.TimeSpan.linspace(t = 30, num_points = 31)
     model.timespan(tspan)
     return model

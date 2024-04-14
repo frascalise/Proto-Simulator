@@ -12,7 +12,7 @@ def main():
     frequences = []
     reactions = []
 
-    numTrajectories=1 # Numero lanci da fare
+    numTrajectories = 1 # Numero lanci da fare
     model = protoZero(species, frequences, reactions)
     results = model.run(number_of_trajectories = numTrajectories)
 
