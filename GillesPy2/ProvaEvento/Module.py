@@ -44,11 +44,9 @@ def protoZero(species, frequences, reactions):
                     reactants.append(i)
 
             frequences.append(gillespy2.Parameter(name = 'k' + str(reactionCounter), expression = frequence))
+            
 
-            # FIXME: Sostituire 'propensity_function' con 'rate' e cercare di eliminare 'dummy_species'
-            # IDEA: Aggiungere 'reactants' e 'products' con un for unendolo ai due for sotto.
-            #       Se i 'reactants' sono vuoti allora inizializzo la reazione con il products e poi faccio 
-            #       'add_product()' e 'add_reactant()'
+#           TODO: Modificare le propesity_function con le formule che ti ha dato il prof
 
             if reactants:
                 reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
@@ -87,6 +85,6 @@ def protoZero(species, frequences, reactions):
     model.add_event([e_div])
 
     # Set the timespan for the simulation.
-    tspan = gillespy2.TimeSpan.linspace(t = 30, num_points = 31)
+    tspan = gillespy2.TimeSpan.linspace(t = 300, num_points = 31)
     model.timespan(tspan)
     return model
