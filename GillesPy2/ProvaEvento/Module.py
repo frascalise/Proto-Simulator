@@ -30,7 +30,7 @@ def protoZero(species, frequences, reactions):
             arrowFound = False      # Se ho trovato il carattere '>'
             semicolonFound = False  # Se ho trovato il carattere ';'
 
-            # Riempio le varie liste con i dati della chimica
+            # Riempio le varie liste con i dati della chimica a seconda di cosa ho letto
             for i in columns:
                 if i == '>':
                     arrowFound = True
@@ -44,21 +44,47 @@ def protoZero(species, frequences, reactions):
                     reactants.append(i)
 
             frequences.append(gillespy2.Parameter(name = 'k' + str(reactionCounter), expression = frequence))
-            
 
-#           TODO: Modificare le propesity_function con le formule che ti ha dato il prof
+
+            #    FORMULE PER PROPENSITY_FUNCTION
+            #       >   A   ;   k1                                  |   propensity_function = "k1*vol"
+            #       A   >   ;   k1                                  |   propensity_function = "k1*A"
+            #       A   +   B   >   AB   ;   k1                     |   propensity_function = "k1*A*B/vol"
+            #       A   +   B   +   C   >   AB   ;   k1             |   propensity_function = "k1*A*B*C/(vol*vol)"
+            #       A   +   B   +   C   +   D   >   AB   ;   k1     |   propensity_function = "k1*A*B*C*D/(vol*vol*vol)"
+
+            #   reactantsNumber:    mi dice il numero di reagenti presenti nella reazione che ho appena letto
+            #   propensityFunction: e' la stringa che contiene la formula da inserire in propensityFunction e viene costruita a seconda
+            #                       della reazione che consideriamo (vedi formule sopra)
+            reactantsNumber = len(reactants)    
+            propensityFunction = str(frequences[reactionCounter].name)
+
+            if reactantsNumber == 0:
+                propensityFunction += "*vol"
+
+            else: 
+                for i in reactants:
+                    propensityFunction += "*" + str(i)
+
+                if reactantsNumber > 1:
+                    propensityFunction += "/(vol" 
+
+                    for i in range(1, (reactantsNumber - 1)):
+                        propensityFunction += "*vol"
+
+                    propensityFunction += ")"
 
             if reactants:
                 reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
                                                 reactants = {reactants[0]:1}, 
                                                 products = {}, 
-                                                propensity_function = str(frequences[reactionCounter].name))
+                                                propensity_function = propensityFunction)
                 reactants.pop(0)
             elif products:
                 reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
                                                 reactants = {}, 
                                                 products = {products[0]:1}, 
-                                                propensity_function = str(frequences[reactionCounter].name))
+                                                propensity_function = propensityFunction)
                 products.pop(0)
                 
             for i in reactants:
