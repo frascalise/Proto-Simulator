@@ -1,0 +1,5 @@
+INPUT	chimica1.txt
+OUTPUT	output.xlsx
+TIME	200
+POINTS	20
+TRAJECTORIES	1

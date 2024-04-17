@@ -1,19 +1,33 @@
 import gillespy2
 import matplotlib.pyplot as plt
 from Module import *
+from ReadParams import *
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
 
 
 def main():
 
-    # Inizializzo gli che conterranno tutte le informazioni lette da chimica.txt
+    # Inizializzo i parametri che verranno poi letti in params.txt
+    INPUT_FILE = readInput()
+    OUTPUT_FILE = readOutput()
+    TIME = readTime()
+    POINTS = readPoints()
+    TRAJECTORIES = readTrajectories()
+
+    print("INPUT: ", INPUT_FILE)
+    print("OUTPUT: ", OUTPUT_FILE)
+    print("TIME: ", TIME)
+    print("POINTS: ", POINTS)
+    print("TRAJECTORIES: ", TRAJECTORIES)
+
+    # Inizializzo le liste che conterranno tutte le informazioni lette da chimica.txt
     species = [] 
     frequences = []
     reactions = []
 
     numTrajectories = 1 # Numero lanci da fare
-    model = protoZero(species, frequences, reactions)
+    model = protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions)
     results = model.run(number_of_trajectories = numTrajectories)
 
     # Creo il foglio dove scrivere i dati
@@ -33,7 +47,7 @@ def main():
     columnIndex = 1
     rowIndex = 2
 
-    for index in range(0, numTrajectories):
+    for index in range(0, TRAJECTORIES):
         trajectory = results[index]
 
         for i in species:
@@ -47,11 +61,8 @@ def main():
                 columnIndex += 1
                 rowIndex = 2
 
-
-
-
     # Salva il workbook su file
-    wb.save("output.xlsx")
+    wb.save(OUTPUT_FILE)
 
     plt.legend()
     plt.title("Esempio GillesPy") 

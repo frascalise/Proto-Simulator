@@ -1,12 +1,12 @@
 import gillespy2
 
 
-def protoZero(species, frequences, reactions):
+def protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions):
     
     # Inizializzo il modello
     model = gillespy2.Model()
 
-    with open('chimica.txt', 'r') as file:
+    with open(INPUT_FILE, 'r') as file:
         lines = file.readlines()
     
     readSpecies = True  # Quanto incontrerò la riga che separa le specie dalle reazioni diventerà False
@@ -111,6 +111,6 @@ def protoZero(species, frequences, reactions):
     model.add_event([e_div])
 
     # Set the timespan for the simulation.
-    tspan = gillespy2.TimeSpan.linspace(t = 300, num_points = 31)
+    tspan = gillespy2.TimeSpan.linspace(t = TIME, num_points = POINTS)
     model.timespan(tspan)
     return model
