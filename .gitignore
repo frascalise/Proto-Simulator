@@ -1,4 +1,4 @@
 .DS_Store
 __pycache__/
-GillesPy2/ProvaEvento/output.xlsx
-GillesPy2/ProvaEvento/chimica[0-9]*.txt
+GillesPy2/ProvaEvento/input/chimica[0-9]*.txt
+GillesPy2/ProvaEvento/output/output.xlsx
