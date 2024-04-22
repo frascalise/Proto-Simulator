@@ -1,4 +1,3 @@
-import gillespy2
 import matplotlib.pyplot as plt
 from Module import *
 from ReadParams import *
@@ -35,7 +34,7 @@ def main():
 
     rowIndex = 1
     columnIndex = 1
-    
+
     for i in species:
         cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
         redBG = PatternFill(start_color="E97451", end_color="E97451", fill_type="solid")
