@@ -26,9 +26,8 @@ def main():
     frequences = []
     reactions = []
 
-    numTrajectories = 1 # Numero lanci da fare
     model = protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions)
-    results = model.run(number_of_trajectories = numTrajectories)
+    results = model.run(number_of_trajectories = TRAJECTORIES)
 
     # Creo il foglio dove scrivere i dati
     wb = Workbook()
@@ -36,13 +35,13 @@ def main():
 
     rowIndex = 1
     columnIndex = 1
+    
     for i in species:
-        if i.name != 'dummy':
-            cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
-            redBG = PatternFill(start_color="E97451", end_color="E97451", fill_type="solid")
-            cell.fill = redBG
+        cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
+        redBG = PatternFill(start_color="E97451", end_color="E97451", fill_type="solid")
+        cell.fill = redBG
 
-            columnIndex += 1
+        columnIndex += 1
 
     columnIndex = 1
     rowIndex = 2
