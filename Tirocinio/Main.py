@@ -1,8 +1,9 @@
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt             # type: ignore
+from openpyxl.styles import PatternFill     # type: ignore
+from openpyxl import Workbook               # type: ignore
+
 from Module import *
 from ReadParams import *
-from openpyxl import Workbook
-from openpyxl.styles import PatternFill
 
 
 def main():
