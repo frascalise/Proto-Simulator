@@ -36,11 +36,6 @@ def main():
     rowIndex = 1
     columnIndex = 2
 
-    # Aggiungi la colonna TIME al foglio di lavoro
-    ws.cell(row=1, column=1, value="TIME")
-    for i in range(1, POINTS):
-        ws.cell(row=i+1, column=1, value=i)
-
     for j in range(0, TRAJECTORIES):
         for i in species:
             cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
@@ -55,16 +50,20 @@ def main():
     for index in range(0, TRAJECTORIES):
         trajectory = results[index]
 
-        for i in species:
-            if i.name != 'dummy':
-                plt.plot(trajectory['time'], trajectory[i.name], label = i.name)
+        # Aggiungi la colonna TIME al foglio di lavoro
+        ws.cell(row=1, column=1, value="TIME")
+        for i in range(1, len(results['time'])):
+            ws.cell(row=i+1, column=1, value=results['time'][i])
 
-                for yIndex in range(1, len(trajectory[i.name])):
-                    ws.cell(row=rowIndex, column=columnIndex, value=trajectory[i.name][yIndex])
-                    rowIndex += 1
-                
-                columnIndex += 1
-                rowIndex = 2
+        for i in species:
+            plt.plot(trajectory['time'], trajectory[i.name], label = i.name)
+
+            for yIndex in range(1, len(trajectory[i.name])):
+                ws.cell(row=rowIndex, column=columnIndex, value=trajectory[i.name][yIndex])
+                rowIndex += 1
+            
+            columnIndex += 1
+            rowIndex = 2
 
     # Salva il workbook su file
     wb.save(OUTPUT_FILE)
