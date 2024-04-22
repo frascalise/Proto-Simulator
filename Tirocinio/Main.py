@@ -33,7 +33,12 @@ def main():
     ws = wb.active
 
     rowIndex = 1
-    columnIndex = 1
+    columnIndex = 2
+
+    # Aggiungi la colonna TIME al foglio di lavoro
+    ws.cell(row=1, column=1, value="TIME")
+    for i in range(1, POINTS):
+        ws.cell(row=i+1, column=1, value=i)
 
     for i in species:
         cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
@@ -42,7 +47,7 @@ def main():
 
         columnIndex += 1
 
-    columnIndex = 1
+    columnIndex = 2
     rowIndex = 2
 
     for index in range(0, TRAJECTORIES):
