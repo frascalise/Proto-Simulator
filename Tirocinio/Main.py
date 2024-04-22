@@ -40,12 +40,13 @@ def main():
     for i in range(1, POINTS):
         ws.cell(row=i+1, column=1, value=i)
 
-    for i in species:
-        cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
-        redBG = PatternFill(start_color="E97451", end_color="E97451", fill_type="solid")
-        cell.fill = redBG
+    for j in range(0, TRAJECTORIES):
+        for i in species:
+            cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
+            redBG = PatternFill(start_color="E97451", end_color="E97451", fill_type="solid")
+            cell.fill = redBG
 
-        columnIndex += 1
+            columnIndex += 1
 
     columnIndex = 2
     rowIndex = 2
