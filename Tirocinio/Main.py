@@ -28,7 +28,7 @@ def main():
 
     model = protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions)
     results = model.run(number_of_trajectories = TRAJECTORIES)
-
+    
     # Creo il foglio dove scrivere i dati
     wb = Workbook()
     ws = wb.active
@@ -49,7 +49,7 @@ def main():
 
     for index in range(0, TRAJECTORIES):
         trajectory = results[index]
-
+        
         # Aggiungi la colonna TIME al foglio di lavoro
         ws.cell(row=1, column=1, value="TIME")
         for i in range(1, len(results['time'])):
@@ -59,7 +59,7 @@ def main():
             plt.plot(trajectory['time'], trajectory[i.name], label = i.name)
 
             for yIndex in range(1, len(trajectory[i.name])):
-                ws.cell(row=rowIndex, column=columnIndex, value=trajectory[i.name][yIndex])
+                ws.cell(row=rowIndex, column=columnIndex, value=int(trajectory[i.name][yIndex]))
                 rowIndex += 1
             
             columnIndex += 1

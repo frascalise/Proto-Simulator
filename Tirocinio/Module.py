@@ -47,7 +47,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions):
 
 
             #    FORMULE PER PROPENSITY_FUNCTION
-            #       >   A   ;   k1                                  |   propensity_function = "k1*vol"
+            #       >   A   ;   k1                                  |   propensity_function = "k1"
             #       A   >   ;   k1                                  |   propensity_function = "k1*A"
             #       A   +   B   >   AB   ;   k1                     |   propensity_function = "k1*A*B/vol"
             #       A   +   B   +   C   >   AB   ;   k1             |   propensity_function = "k1*A*B*C/(vol*vol)"
@@ -59,10 +59,8 @@ def protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions):
             reactantsNumber = len(reactants)    
             propensityFunction = str(frequences[reactionCounter].name)
 
-            if reactantsNumber == 0:
-                propensityFunction += "*vol"
-
-            else: 
+            if reactantsNumber != 0:
+                
                 for i in reactants:
                     propensityFunction += "*" + str(i)
 
@@ -104,17 +102,13 @@ def protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions):
     model.add_parameter(frequences)
     model.add_reaction(reactions)
 
-    # Set the timespan for the simulation.
-    tspan = gillespy2.TimeSpan.linspace(t = TIME, num_points = POINTS)
-    model.timespan(tspan)
-    return model
-
-'''
     trig = gillespy2.EventTrigger(expression = "A > 100")       # L'evento si attiva quando l'espressione diventa FALSO (da VERO) o VERO (da Falso)
     evento1 = gillespy2.EventAssignment(variable = "A", expression = "A/2")
     e_div = gillespy2.Event(name = "e_div", assignments = [evento1] , trigger = trig)
 
     model.add_event([e_div])
-'''
-    
-    
+
+    # Set the timespan for the simulation.
+    tspan = gillespy2.TimeSpan.linspace(t = TIME, num_points = POINTS)
+    model.timespan(tspan)
+    return model
