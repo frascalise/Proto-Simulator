@@ -14,19 +14,23 @@ def main():
     TIME = readTime()
     POINTS = readPoints()
     TRAJECTORIES = readTrajectories()
+    COEFF = readCoeff()
 
     print("INPUT: ", INPUT_FILE)
     print("OUTPUT: ", OUTPUT_FILE)
     print("TIME: ", TIME)
     print("POINTS: ", POINTS)
     print("TRAJECTORIES: ", TRAJECTORIES)
+    print("COEFF: ", TRAJECTORIES)
+    print("\n")
 
-    # Inizializzo le liste che conterranno tutte le informazioni lette da chimica.txt
+    # Inizializzo le liste e dizionari che conterranno tutte le informazioni lette da chimica.txt
     species = [] 
     frequences = []
     reactions = []
+    catalysis = {}
 
-    model = protoZero(INPUT_FILE, TIME, POINTS, species, frequences, reactions)
+    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis)
     results = model.run(number_of_trajectories = TRAJECTORIES)
     
     # Creo il foglio dove scrivere i dati

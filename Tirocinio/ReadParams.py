@@ -52,3 +52,14 @@ def readTrajectories():
                 parameter_type, parameter_value = columns
                 if parameter_type == "TRAJECTORIES":
                     return int(parameter_value)
+
+def readCoeff():
+    with open("input/params.txt", "r") as file:
+        for line in file:
+            columns = line.split('\t')
+            columns = [col.strip() for col in columns]
+
+            if len(columns) == 2:
+                parameter_type, parameter_value = columns
+                if parameter_type == "COEFF":
+                    return float(parameter_value)
