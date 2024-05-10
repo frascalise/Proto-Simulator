@@ -1,4 +1,4 @@
-import gillespy2
+import gillespy2    #  type: ignore
 
 
 def outputData(species, catalysis):
@@ -7,19 +7,22 @@ def outputData(species, catalysis):
         print("Nome: ", i.name, "\tQuantità: ", i.initial_value)
     print("\n")
     print("CATALISI: ", catalysis)
+    print("\n")
 
 
 #   Scorrere il dizionario catalysis e aggiungere a reactions le reazioni di catalisi.
 #   Per ogni specie che ha un valore diverso da 0 nel dizionario catalysis, aggiungere una reazione.
 #   Esempio reazione:
 #       A	>	A	+	Lipid	;	valore_catalisi_nel_dizionario
+#   species_name:   è il nome della specie nelle prime righe della chimica
+#   catalysis_value:    è il valore di catalisi associato alla specie
 def addCatalysisReactions(model, catalysis):
     for species_name, catalysis_value in catalysis.items():
         if float(catalysis_value) > 0:
             reaction = gillespy2.Reaction(  name = 'catalysis_' + species_name,
                                             reactants = {species_name: 1},
                                             products = {species_name: 1, list(catalysis.keys())[0]: 1},
-                                            propensity_function = str(float(catalysis_value)))
+                                            propensity_function = str(float(catalysis_value)) + "*" + species_name)
             print(reaction)
             model.add_reaction(reaction)
 
@@ -135,11 +138,26 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
     model.add_parameter(frequences)
     model.add_reaction(reactions)
 
-    addCatalysisReactions(model, catalysis)
+    addCatalysisReactions(model, catalysis)    # Aggiungo le reazioni di catalisi
 
-    trig = gillespy2.EventTrigger(expression = "A > 100")       # L'evento si attiva quando l'espressione diventa FALSO (da VERO) o VERO (da Falso)
-    evento1 = gillespy2.EventAssignment(variable = "A", expression = "A/2")
-    e_div = gillespy2.Event(name = "e_div", assignments = [evento1] , trigger = trig)
+    ### EVENTI ###
+    #   Aggiungo il trigger per l'evento di divisione
+    trig = gillespy2.EventTrigger(expression = "L > 500")       # L'evento si attiva quando l'espressione diventa FALSO (da VERO) o VERO (da Falso)
+    
+    #  Aggiungo gli eventi di divisione
+    print("EVENTI: ")
+    events = []
+    
+    #  Evento di divisione del lipide
+    evento = gillespy2.EventAssignment(variable = list(catalysis.keys())[0], expression = f"{list(catalysis.keys())[0]}/2")
+    events.append(evento)
+    print(evento, "\n")
+
+    for species_name in list(catalysis.keys())[1:]:
+        evento = gillespy2.EventAssignment(variable = species_name, expression = f"{species_name}*0.35")
+        events.append(evento)
+        print(evento, "\n")
+    e_div = gillespy2.Event(name = "e_div", assignments = events , trigger = trig)
 
     model.add_event([e_div])
 
