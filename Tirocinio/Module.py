@@ -50,7 +50,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
             continue
 
         ### Leggo specie dell'ambiente dal file e le salvo in 'species[]' ###
-        if readSpecies:                            
+        if readSpecies:  
             species.append(gillespy2.Species(name = columns[0], initial_value = int(columns[1])))
             catalysis[columns[0]] = columns[2]      # Salvo le catalisi in un dizionario
 

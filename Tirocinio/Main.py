@@ -44,9 +44,12 @@ def main():
     rowIndex = 1
     columnIndex = 2
 
+    speciesColumn = {}  # Dizionario che mappa la colonna con il nome della specie
+
     for j in range(0, TRAJECTORIES):
         for i in species:
             cell = ws.cell(row=rowIndex, column=columnIndex, value=i.name)
+            speciesColumn[columnIndex] = i.name
             redBG = PatternFill(start_color="E97451", end_color="E97451", fill_type="solid")
             cell.fill = redBG
 
@@ -62,8 +65,8 @@ def main():
         model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis)
         print("********** GENERAZIONE ", genCounter + 1, "********** ")
         results = model.run(number_of_trajectories = TRAJECTORIES)
-
         columnIndex = 2
+        
         for index in range(0, TRAJECTORIES):
             trajectory = results[index]
             
