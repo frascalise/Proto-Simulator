@@ -60,10 +60,10 @@ def main():
         catalysis = {}
 
         model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis)
+        print("********** GENERAZIONE ", genCounter + 1, "********** ")
         results = model.run(number_of_trajectories = TRAJECTORIES)
 
         columnIndex = 2
-
         for index in range(0, TRAJECTORIES):
             trajectory = results[index]
             
