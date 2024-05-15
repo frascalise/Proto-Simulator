@@ -16,13 +16,15 @@ def outputData(species, catalysis):
 #       A	>	A	+	Lipid	;	valore_catalisi_nel_dizionario
 #   species_name:   è il nome della specie nelle prime righe della chimica
 #   catalysis_value:    è il valore di catalisi associato alla specie
-def addCatalysisReactions(model, catalysis):
+def addCatalysisReactions(model, catalysis, frequences, reactionCounter):
     for species_name, catalysis_value in catalysis.items():
         if float(catalysis_value) > 0:
+            frequences.append(gillespy2.Parameter(name = 'k' + str(reactionCounter), expression = 1))
             reaction = gillespy2.Reaction(  name = 'catalysis_' + species_name,
                                             reactants = {species_name: 1},
                                             products = {species_name: 1, list(catalysis.keys())[0]: 1},
-                                            propensity_function = str(float(catalysis_value)) + "*" + species_name)
+                                            propensity_function = str(float(catalysis_value)) + "*" + species_name + "*" + str(frequences[reactionCounter].name))
+            reactionCounter = reactionCounter + 1
             print(reaction)
             model.add_reaction(reaction)
 
@@ -134,11 +136,13 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
             reactions.append(reaction)
             reactionCounter = reactionCounter + 1
 
+    species.append(gillespy2.Species(name = "tempo", initial_value = 0))    # Aggiungo la specie tempo all'ambiente
+    
     model.add_species(species)
-    model.add_parameter(frequences)
     model.add_reaction(reactions)
-
-    addCatalysisReactions(model, catalysis)    # Aggiungo le reazioni di catalisi
+    
+    addCatalysisReactions(model, catalysis, frequences, reactionCounter)    # Aggiungo le reazioni di catalisi
+    model.add_parameter(frequences)
 
     ### EVENTI ###
     #   Aggiungo il trigger per l'evento di divisione
@@ -151,12 +155,25 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
     #  Evento di divisione del lipide
     evento = gillespy2.EventAssignment(variable = list(catalysis.keys())[0], expression = f"{list(catalysis.keys())[0]}/2")
     events.append(evento)
-    print(evento, "\n")
+    print(evento)
 
+    # Con questo ciclo for simulo l'avvenimento di una divisione dividendo tutte le specie per 0.35
     for species_name in list(catalysis.keys())[1:]:
         evento = gillespy2.EventAssignment(variable = species_name, expression = f"{species_name}*0.35")
         events.append(evento)
-        print(evento, "\n")
+        print(evento)
+    
+    # Con questo ciclo for imposto tutti i k delle reazioni (le loro frequenze) a 0 in modo tale che non avvengano piu' reazioni
+    for parametro in frequences:    
+        evento = gillespy2.EventAssignment(variable = parametro.name, expression = "0.0")
+        events.append(evento)
+        print(evento)
+
+    # Creo l'evento che assegnerà il tempo esatto della divisione della protocellula alla specie tempo
+    evento = gillespy2.EventAssignment(variable = "tempo", expression = "t")
+    events.append(evento)
+    print(evento)
+
     e_div = gillespy2.Event(name = "e_div", assignments = events , trigger = trig)
 
     model.add_event([e_div])
