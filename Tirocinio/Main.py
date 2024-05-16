@@ -33,6 +33,14 @@ def outputData(species, reactions, catalysis, events, frequences, genCounter):
     print("\n")
 
 
+def initialize(species, frequences, reactions, catalysis, events):
+    species = [] 
+    frequences = []
+    reactions = []
+    catalysis = {}
+    events = []    
+
+
 def main():
 
     # Inizializzo i parametri che verranno poi letti in params.txt
@@ -56,12 +64,14 @@ def main():
     print("GENERATIONS: ", GENERATIONS)
     print("\n")
 
-    # Inizializzo le liste e dizionari che conterranno tutte le informazioni lette da chimica.txt
     species = [] 
     frequences = []
     reactions = []
     catalysis = {}
-    events = []
+    events = []  
+
+    # Inizializzo le liste e dizionari che conterranno tutte le informazioni lette da chimica.txt
+    initialize(species, frequences, reactions, catalysis, events)
     model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events)
 
     # Creo il foglio dove scrivere i dati
@@ -101,11 +111,7 @@ def main():
     stopSimulation = False
     
     for genCounter in range(0, GENERATIONS):
-        species = [] 
-        frequences = []
-        reactions = []
-        catalysis = {}
-        events = []
+        initialize(species, frequences, reactions, catalysis, events)
         stopGeneration = False
         dummyValues = {} # Dizionario temporanea per salvare i valori delle specie
 
@@ -124,6 +130,7 @@ def main():
 
                     if speciesColumn[j] == "tempo":
                         ws.cell(row=i+continueRow, column=j+1, value=int(trajectory[j][i]+continueTime))
+
                         # Se il tempo cambia, vuol dire che la protocellula si e' divisa e la generazione finisce
                         if trajectory[j][i] != trajectory[j][i-1] and i != 0:       
                             #print("STOP GENERATION: ", stopGeneration, "\n")
@@ -131,16 +138,16 @@ def main():
                             #print("continueTime + trajectory[j][i] =",continueTime, "+", trajectory[j][i])
                             continueTime += trajectory[j][i]
                             stopGeneration = True
-                            stopSimulation = False
+                            stopSimulation = False     
                     else:
                         ws.cell(row=i+continueRow, column=j+1, value=int(trajectory[j][i]))
-                      
                 
                 if stopGeneration:
                     continueRow += i
 
+                    # Salva i valori delle specie in dummyValues
                     for j in range(1, len(trajectory)-1):
-                        dummyValues[speciesColumn[j]] = int(trajectory[j][i])   # Primo e ultimo valore di questa lista sono da scartare
+                        dummyValues[speciesColumn[j]] = int(trajectory[j][i])
                     
                     #print("DummyValues: ", dummyValues)
 
@@ -148,7 +155,8 @@ def main():
                     if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
                         os.remove("input/KBVNRDL1Qp_Chimica.txt")
 
-                    # Crea un nuovo file di testo chiamato dummyChimica nella cartella input in scrittura, conterra' le nuove quantita' delle specie
+                    # Crea un nuovo file di testo chiamato KBVNRDL1Qp_Chimica nella cartella input in scrittura, conterra' le nuove quantita' delle specie
+                    # e le reazioni chimiche originali
                     with open("input/KBVNRDL1Qp_Chimica.txt", "w") as file:
                         INPUT_FILE = "input/KBVNRDL1Qp_Chimica.txt"
                         #print(catalysis)                        
@@ -170,6 +178,7 @@ def main():
 
                         # Scrivo le reazioni chimiche nel file dummyChimica.txt
                         file.write(new_content)
+                    
                     break
                 else:
                     stopSimulation = True
@@ -179,8 +188,8 @@ def main():
 
 
     os.system('cls' if os.name == 'nt' else 'clear')
-    # Salva il workbook su file
-    wb.save(OUTPUT_FILE)
+    
+    wb.save(OUTPUT_FILE) # Salva il file excel
     
     # Cancella il file "input/dummyChimica.txt" se esiste
     if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):

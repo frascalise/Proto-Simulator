@@ -16,7 +16,7 @@ def outputData(species, catalysis):
 #       A	>	A	+	Lipid	;	valore_catalisi_nel_dizionario
 #   species_name:   è il nome della specie nelle prime righe della chimica
 #   catalysis_value:    è il valore di catalisi associato alla specie
-def addCatalysisReactions(model, catalysis, frequences, reactionCounter):
+def addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactions):
     for species_name, catalysis_value in catalysis.items():
         if float(catalysis_value) > 0:
             frequences.append(gillespy2.Parameter(name = 'k' + str(reactionCounter), expression = 1))
@@ -27,6 +27,7 @@ def addCatalysisReactions(model, catalysis, frequences, reactionCounter):
             reactionCounter = reactionCounter + 1
             #print(reaction)
             model.add_reaction(reaction)
+            reactions.append(reaction)
 
 
 def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events):
@@ -141,7 +142,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
     model.add_species(species)
     model.add_reaction(reactions)
     
-    addCatalysisReactions(model, catalysis, frequences, reactionCounter)    # Aggiungo le reazioni di catalisi
+    addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactions)    # Aggiungo le reazioni di catalisi
     model.add_parameter(frequences)
 
     ### EVENTI ###
