@@ -186,7 +186,7 @@ def main():
     if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
         os.remove("input/KBVNRDL1Qp_Chimica.txt")
 
-    print("********** SIMULAZIONE TERMINATA ********** \n")
+    print("########## SIMULAZIONE TERMINATA ########## \n")
     quotes()
     
 

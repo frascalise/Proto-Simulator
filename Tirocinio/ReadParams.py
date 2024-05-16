@@ -88,6 +88,10 @@ def quotes():
         "What you learn from a life in science is the vastness of our ignorance.",
         'When do you think a person dies?\n When a bullet from a pistol pierces his heart? No.\n When he is attacked by an incurable disease? No.\n When he eats a soup of deadly poisonous mushrooms? No.\n A man dies when people forget him! - Dr. Hiriluk',
         "I'll Do What You Can't Do, And You Do What I Can't Do.",
-        "The Flower Of Friendship Can Bloom Even In Hell."
+        "The Flower Of Friendship Can Bloom Even In Hell.",
+        "If You Ask This Old Man Anything… Then I Will Quit Being A Pirate! \nIf It’s A Boring Adventure, I Don’t Want It!",
+        "If You Don’t Take Risks, You Can’t Create A Future",
+        "Life would be tragic if it weren't funny.",
+        "The past, like the future, is indefinite and exists only as a spectrum of possibilities."
         ]
     print(quotes[random.randint(0, len(quotes) - 1)], "\n\n")
