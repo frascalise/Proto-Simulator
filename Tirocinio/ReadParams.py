@@ -86,7 +86,7 @@ def quotes():
         "Everything is theoretically impossible, until it is done.",
         "The reward of the young scientist is the emotional thrill of being the first person in the history of the world to see something or to understand something. Nothing can compare with that experience.",
         "What you learn from a life in science is the vastness of our ignorance.",
-        'When do you think a person dies?\n When a bullet from a pistol pierces his heart? No.\n When he is attacked by an incurable disease? No.\n When he eats a soup of deadly poisonous mushrooms? No.\n A man dies when people forget him! - Dr. Hiriluk',
+        'When do you think a person dies?\nWhen a bullet from a pistol pierces his heart? No.\nWhen he is attacked by an incurable disease? No.\nWhen he eats a soup of deadly poisonous mushrooms? No.\nA man dies when people forget him! - Dr. Hiriluk',
         "I'll Do What You Can't Do, And You Do What I Can't Do.",
         "The Flower Of Friendship Can Bloom Even In Hell."
         ]
