@@ -34,11 +34,11 @@ def outputData(species, reactions, catalysis, events, frequences, genCounter):
 
 
 def initialize(species, frequences, reactions, catalysis, events):
-    species = [] 
-    frequences = []
-    reactions = []
-    catalysis = {}
-    events = []    
+    species.clear()
+    frequences.clear()
+    reactions.clear()
+    catalysis.clear()
+    events.clear()
 
 
 def main():
