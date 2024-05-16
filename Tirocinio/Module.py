@@ -25,11 +25,11 @@ def addCatalysisReactions(model, catalysis, frequences, reactionCounter):
                                             products = {species_name: 1, list(catalysis.keys())[0]: 1},
                                             propensity_function = str(float(catalysis_value)) + "*" + species_name + "*" + str(frequences[reactionCounter].name))
             reactionCounter = reactionCounter + 1
-            print(reaction)
+            #print(reaction)
             model.add_reaction(reaction)
 
 
-def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis):
+def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events):
     # Inizializzo il modello
     model = gillespy2.Model()
 
@@ -132,7 +132,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
             for i in products:
                 reaction.add_product(species=i, stoichiometry=1)
 
-            print(reaction)
+            #print(reaction)
             reactions.append(reaction)
             reactionCounter = reactionCounter + 1
 
@@ -149,30 +149,29 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
     trig = gillespy2.EventTrigger(expression = "L > 500")       # L'evento si attiva quando l'espressione diventa FALSO (da VERO) o VERO (da Falso)
     
     #  Aggiungo gli eventi di divisione
-    print("EVENTI: ")
-    events = []
+    #print("EVENTI: ")
     
     #  Evento di divisione del lipide
     evento = gillespy2.EventAssignment(variable = list(catalysis.keys())[0], expression = f"{list(catalysis.keys())[0]}/2")
     events.append(evento)
-    print(evento)
+    #print(evento)
 
     # Con questo ciclo for simulo l'avvenimento di una divisione dividendo tutte le specie per 0.35
     for species_name in list(catalysis.keys())[1:]:
         evento = gillespy2.EventAssignment(variable = species_name, expression = f"{species_name}*0.35")
         events.append(evento)
-        print(evento)
+        #print(evento)
     
     # Con questo ciclo for imposto tutti i k delle reazioni (le loro frequenze) a 0 in modo tale che non avvengano piu' reazioni
     for parametro in frequences:    
         evento = gillespy2.EventAssignment(variable = parametro.name, expression = "0.0")
         events.append(evento)
-        print(evento)
+        #print(evento)
 
     # Creo l'evento che assegnerà il tempo esatto della divisione della protocellula alla specie tempo
     evento = gillespy2.EventAssignment(variable = "tempo", expression = "t")
     events.append(evento)
-    print(evento)
+    #print(evento)
 
     e_div = gillespy2.Event(name = "e_div", assignments = events , trigger = trig)
 
@@ -182,6 +181,6 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
     tspan = gillespy2.TimeSpan.linspace(t = TIME, num_points = POINTS)
     model.timespan(tspan)
 
-    outputData(species, catalysis)
+    #outputData(species, catalysis)
 
     return model

@@ -5,6 +5,32 @@ from openpyxl import Workbook               # type: ignore
 
 from Module import *
 from ReadParams import *
+import sys
+
+
+def outputData(species, reactions, catalysis, events, frequences, genCounter):
+    print("********** GENERAZIONE ", genCounter + 1, "********** \n")
+    print("\n########## SPECIE ##########\n")
+    for i in species:
+        print(i)
+    print("\n=================================")
+    print("\n########## REAZIONI ##########\n")
+    for i in reactions:
+        print(i)
+    print("\n=================================")
+    print("\n########## FREQUENZE ##########\n")
+    for i in frequences:
+        print(i)
+    print("\n=================================")
+    print("\n########## CATALISI ##########\n")
+    for i in catalysis:
+        print(i, ":", catalysis[i])
+    print("\n=================================")
+    print("\n########## EVENTI ##########\n")
+    for i in events:
+        print(i)
+    print("\n=================================")
+    print("\n")
 
 
 def main():
@@ -35,7 +61,8 @@ def main():
     frequences = []
     reactions = []
     catalysis = {}
-    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis)
+    events = []
+    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events)
 
     # Creo il foglio dove scrivere i dati
     wb = Workbook()
@@ -47,16 +74,16 @@ def main():
     ws.cell(row=1, column=1, value="TIME")
     speciesColumn[0] = "TIME"
 
-    rowIndex = 1
-    columnIndex = 2
 
     orderedSpecies = []
     for k in species:
         orderedSpecies.append(k.name)
     
     orderedSpecies.sort()
-
     orderedSpeciesColumn = {}
+    
+    rowIndex = 1
+    columnIndex = 2
     for j in range(0, TRAJECTORIES):
         for i in orderedSpecies:
             cell = ws.cell(row=rowIndex, column=columnIndex, value=i)
@@ -67,7 +94,7 @@ def main():
             columnIndex += 1
 
     speciesColumn.update(orderedSpeciesColumn)
-    print(speciesColumn)
+    #print(speciesColumn)
 
     continueRow = 2 # Indice della riga da cui continuare a scrivere i dati
     continueTime = 0
@@ -78,11 +105,14 @@ def main():
         frequences = []
         reactions = []
         catalysis = {}
+        events = []
         stopGeneration = False
         dummyValues = {} # Dizionario temporanea per salvare i valori delle specie
 
-        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis)
-        print("********** GENERAZIONE ", genCounter + 1, "********** ")
+        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        outputData(species, reactions, catalysis, events, frequences, genCounter)
+
         results = model.run(number_of_trajectories = TRAJECTORIES)
         
         for index in range(0, TRAJECTORIES):
@@ -98,8 +128,8 @@ def main():
                         if trajectory[j][i] != trajectory[j][i-1] and i != 0:       
                             #print("STOP GENERATION: ", stopGeneration, "\n")
                             #print("STOP SIMULATION: ", stopSimulation, "\n")
+                            #print("continueTime + trajectory[j][i] =",continueTime, "+", trajectory[j][i])
                             continueTime += trajectory[j][i]
-                            print("continueTime + trajectory[j][i] =",continueTime, "+", trajectory[j][i])
                             stopGeneration = True
                             stopSimulation = False
                     else:
@@ -121,7 +151,7 @@ def main():
                     # Crea un nuovo file di testo chiamato dummyChimica nella cartella input in scrittura, conterra' le nuove quantita' delle specie
                     with open("input/KBVNRDL1Qp_Chimica.txt", "w") as file:
                         INPUT_FILE = "input/KBVNRDL1Qp_Chimica.txt"
-                        print(catalysis)                        
+                        #print(catalysis)                        
                         
                         #   Scrive le nuove quantita' delle specie nel file dummyChimica.txt
                         for k in range(0, len(dummyValues)):
@@ -148,6 +178,7 @@ def main():
             break
 
 
+    os.system('cls' if os.name == 'nt' else 'clear')
     # Salva il workbook su file
     wb.save(OUTPUT_FILE)
     
@@ -155,6 +186,9 @@ def main():
     if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
         os.remove("input/KBVNRDL1Qp_Chimica.txt")
 
+    print("********** SIMULAZIONE TERMINATA ********** \n")
+    quotes()
+    
 
 if __name__ == "__main__":
     main()
