@@ -115,12 +115,12 @@ def main():
                     #print("DummyValues: ", dummyValues)
 
                     # Cancella il file "input/dummyChimica.txt" se esiste
-                    if os.path.exists("input/dummyChimica.txt"):
-                        os.remove("input/dummyChimica.txt")
+                    if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
+                        os.remove("input/KBVNRDL1Qp_Chimica.txt")
 
                     # Crea un nuovo file di testo chiamato dummyChimica nella cartella input in scrittura, conterra' le nuove quantita' delle specie
-                    with open("input/dummyChimica.txt", "w") as file:
-                        INPUT_FILE = "input/dummyChimica.txt"
+                    with open("input/KBVNRDL1Qp_Chimica.txt", "w") as file:
+                        INPUT_FILE = "input/KBVNRDL1Qp_Chimica.txt"
                         print(catalysis)                        
                         
                         #   Scrive le nuove quantita' delle specie nel file dummyChimica.txt
@@ -152,8 +152,8 @@ def main():
     wb.save(OUTPUT_FILE)
     
     # Cancella il file "input/dummyChimica.txt" se esiste
-    if os.path.exists("input/dummyChimica.txt"):
-        os.remove("input/dummyChimica.txt")
+    if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
+        os.remove("input/KBVNRDL1Qp_Chimica.txt")
 
 
 if __name__ == "__main__":
