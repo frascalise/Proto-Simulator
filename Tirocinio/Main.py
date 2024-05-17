@@ -5,7 +5,6 @@ from openpyxl import Workbook               # type: ignore
 
 from Module import *
 from ReadParams import *
-import sys
 
 
 def outputData(species, reactions, catalysis, events, frequences, genCounter):
@@ -194,6 +193,30 @@ def main():
     # Cancella il file "input/dummyChimica.txt" se esiste
     if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
         os.remove("input/KBVNRDL1Qp_Chimica.txt")
+
+    # Aggiungi una colonna tra la 1 e la 2 al file excel
+    ws.insert_cols(2)
+
+    # Aggiorna l'header della colonna aggiunta
+    ws.cell(row=1, column=2, value="ABSOLUTE TIME")
+    # Inizializza la colonna "ABSOLUTE TIME" a 0
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=2, max_col=2):
+        for cell in row:
+            cell.value = 0
+    
+    # Aggiorna il valore della prima cella di "ABSOLUTE TIME" con il valore della prima cella della prima colonna
+    ws.cell(row=2, column=2, value=ws.cell(row=2, column=1).value)
+
+    # Aggiorna i valori della colonna "ABSOLUTE TIME"
+    for row in range(3, ws.max_row + 1):
+        if ws.cell(row=row - 1, column=2).value < ws.cell(row=row, column=1).value:
+            ws.cell(row=row, column=2).value = ws.cell(row=row, column=1).value
+        else:
+            ws.cell(row=row, column=2).value = ws.cell(row=row - 1, column=2).value + ws.cell(row=row, column=1).value
+   
+
+    # Salva il file excel
+    wb.save(OUTPUT_FILE)
 
     print("\n########## SIMULAZIONE TERMINATA ##########\n")
     quotes()
