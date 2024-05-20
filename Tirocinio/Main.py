@@ -40,6 +40,98 @@ def initialize(species, frequences, reactions, catalysis, events):
     events.clear()
 
 
+def addEmptyRows(ws):
+    insertRow = False
+    for row in range(3, ws.max_row + 1):
+        if insertRow:
+            insertRow = False
+            continue
+        # Se la cella precedente è uno zero e la cella corrente non è uno zero
+        if ws.cell(row=row, column=1).value == 0 and insertRow == False:
+            # Inserisci una riga tra la cella precedente e la cella corrente
+            ws.insert_rows(row)
+            insertRow = True
+
+
+def fixExcel(ws, speciesColumn, catalysis):
+    lipidName = list(catalysis.keys())[0]
+    #print("Il nome del lipide e': ", lipidName)
+
+    # Assegno i valori di "TIME" e "tempo" alle righe vuote appena create
+    for row in range(2, ws.max_row + 1):
+        if all(ws.cell(row=row, column=cell).value is None for cell in range(2, ws.max_column + 1)):
+            for column in range(0, ws.max_column): # ws.max_column + 1 è il numero di colonne che conto
+                #print(speciesColumn[column])
+                if speciesColumn[column] == "TIME":
+                    key = [k for k, v in speciesColumn.items() if v == "tempo"][0]
+                    ws.cell(row=row, column=column+1, value=ws.cell(row=row+1, column=key+1).value)
+                    ws.cell(row=row, column=key+1, value=ws.cell(row=row+1, column=key+1).value)
+
+    # Assegno i valori del lipide alle righe vuote appena create, ovvero il doppio del valore della riga successiva
+    lipidKey = [k for k, v in speciesColumn.items() if v == lipidName][0] + 1
+    for row in range(2, ws.max_row + 1):
+        if ws.cell(row=row, column=lipidKey).value is None:
+            ws.cell(row=row, column=lipidKey).value = ws.cell(row=row+1, column=lipidKey).value*2
+    
+    # Assegno i valori delle altre specie alle righe vuote appena create, ovvero il valore della riga successiva/0.35
+    for i in range(2, len(speciesColumn.items())-2):
+        for row in range(2, ws.max_row + 1):
+            if ws.cell(row=row, column=i+1).value is None:
+                ws.cell(row=row, column=i+1).value = int(ws.cell(row=row+1, column=i+1).value/0.35)
+
+    # Assegno i valori della riga vuota nella colonna "ABSOLUTE TIME"
+    ws.cell(row=2, column=2).value = ws.cell(row=2, column=1).value
+    for column in range(0, ws.max_column):
+        if speciesColumn[column] == "ABSOLUTE TIME":
+            for row in range(3, ws.max_row + 1):
+                absoluteTimeAdd = ws.cell(row=row, column=1).value - ws.cell(row=row-1, column=1).value
+                if absoluteTimeAdd < 0:
+                    ws.cell(row=row, column=column+1).value = 0 + ws.cell(row=row-1, column=column+1).value
+                else:
+                    ws.cell(row=row, column=column+1).value = absoluteTimeAdd + ws.cell(row=row-1, column=column+1).value
+
+
+def addAbsoluteTime(ws):
+    # Aggiungi una colonna tra la 1 e la 2 al file excel
+    ws.insert_cols(2)
+    ws.cell(row=1, column=2, value="ABSOLUTE TIME")
+    # Inizializza la colonna "ABSOLUTE TIME" a 0
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=2, max_col=2):
+        for cell in row:
+            cell.value = 0
+    
+    # Aggiorna il valore della prima cella di "ABSOLUTE TIME" con il valore della prima cella della prima colonna
+    ws.cell(row=2, column=2, value=ws.cell(row=2, column=1).value)
+
+    # Aggiorna i valori della colonna "ABSOLUTE TIME"
+    for row in range(3, ws.max_row + 1):
+        if ws.cell(row=row - 1, column=2).value < ws.cell(row=row, column=1).value:
+            #ws.cell(row=row, column=2).value = ws.cell(row=row, column=1).value
+            ws.cell(row=row, column=2).value = 0
+        else:
+            #ws.cell(row=row, column=2).value = ws.cell(row=row - 1, column=2).value + abs((ws.cell(row=row, column=1).value - ws.cell(row=row - 1, column=1).value))
+            ws.cell(row=row, column=2).value = 0
+
+
+def colorCells(ws):
+    # Evidenzia in giallo l'inizio di una nuova protocellula
+    insertRow = False
+    for row in range(3, ws.max_row + 1):
+        if insertRow:
+            insertRow = False
+            continue
+        # Se la cella precedente è uno zero e la cella corrente non è uno zero
+        if ws.cell(row=row, column=1).value == 0 and insertRow == False:
+            # Imposta lo sfondo giallo per la nuova riga
+            for cell in ws[row]:
+                cell.fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+            insertRow = True
+
+    # Evidenzia in rosso la prima riga con gli indicatori delle colonne
+    for cell in ws[1]:
+        cell.fill = PatternFill(start_color="8493B0", end_color="8493B0", fill_type="solid")
+
+
 def main():
 
     # Inizializzo i parametri che verranno poi letti in params.txt
@@ -128,14 +220,14 @@ def main():
                 for j in range(0, len(trajectory)):     # Scorro per ogni specie, quindi inserimento per riga 
 
                     if speciesColumn[j] == "tempo":
-                        ws.cell(row=i+continueRow, column=j+1, value=int(trajectory[j][i]+continueTime))
+                        ws.cell(row=i+continueRow, column=j+1, value=int(continueTime))
 
                         # Se il tempo cambia, vuol dire che la protocellula si e' divisa e la generazione finisce
                         if trajectory[j][i] != trajectory[j][i-1] and i != 0:       
                             #print("STOP GENERATION: ", stopGeneration, "\n")
                             #print("STOP SIMULATION: ", stopSimulation, "\n")
                             #print("continueTime + trajectory[j][i] =",continueTime, "+", trajectory[j][i])
-                            continueTime += trajectory[j][i]
+                            continueTime = trajectory[j][i]
                             stopGeneration = True
                             stopSimulation = False     
                     else:
@@ -188,36 +280,37 @@ def main():
 
     os.system('cls' if os.name == 'nt' else 'clear')
     
-    wb.save(OUTPUT_FILE) # Salva il file excel
-    
-    # Cancella il file "input/dummyChimica.txt" se esiste
+    # Cancella il file "input/KBVNRDL1Qp_Chimica.txt" se esiste
     if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
         os.remove("input/KBVNRDL1Qp_Chimica.txt")
 
-    # Aggiungi una colonna tra la 1 e la 2 al file excel
-    ws.insert_cols(2)
+    # ======= MANUTENZIONE FOGLIO EXCEL =======
 
-    # Aggiorna l'header della colonna aggiunta
-    ws.cell(row=1, column=2, value="ABSOLUTE TIME")
-    # Inizializza la colonna "ABSOLUTE TIME" a 0
-    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=2, max_col=2):
-        for cell in row:
-            cell.value = 0
+    # Aggiungo le righe vuote dopo ogni divisione 
+    addEmptyRows(ws)
     
-    # Aggiorna il valore della prima cella di "ABSOLUTE TIME" con il valore della prima cella della prima colonna
-    ws.cell(row=2, column=2, value=ws.cell(row=2, column=1).value)
+    # Aggiorna il dizionario speciesColumn
+    newSpeciesColumn = {}
+    for key, value in speciesColumn.items():
+        newSpeciesColumn[key+1] = value
+    newSpeciesColumn[0] = "TIME"
+    newSpeciesColumn[1] = "ABSOLUTE TIME"
+    speciesColumn = newSpeciesColumn
+    # Ordina speciesColumn per ordine di chiave
+    speciesColumn = dict(sorted(speciesColumn.items(), key=lambda x: x[0]))
+    #print(speciesColumn)
 
-    # Aggiorna i valori della colonna "ABSOLUTE TIME"
-    for row in range(3, ws.max_row + 1):
-        if ws.cell(row=row - 1, column=2).value < ws.cell(row=row, column=1).value:
-            ws.cell(row=row, column=2).value = ws.cell(row=row, column=1).value
-        else:
-            ws.cell(row=row, column=2).value = ws.cell(row=row - 1, column=2).value + ws.cell(row=row, column=1).value
-   
+    # Aggiungi una colonna tra la 1 e la 2 al file excel contenente i valori di "ABSOLUTE TIME"
+    ws.insert_cols(2)
+    ws.cell(row=1, column=2, value="ABSOLUTE TIME")
+
+    # Sistema le righe vuote e i valori delle specie
+    fixExcel(ws, speciesColumn, catalysis)
+    colorCells(ws)
 
     # Salva il file excel
     wb.save(OUTPUT_FILE)
-
+    
     print("\n########## SIMULAZIONE TERMINATA ##########\n")
     quotes()
     
