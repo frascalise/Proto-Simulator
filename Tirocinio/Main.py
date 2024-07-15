@@ -224,9 +224,9 @@ def main():
 
         model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events)
         
+        os.system('cls' if os.name == 'nt' else 'clear')
         # Non stampa la generazione non esistente
         if genCounter < GENERATIONS - 1:
-            os.system('cls' if os.name == 'nt' else 'clear')
             outputData(species, reactions, catalysis, events, frequences, genCounter)
 
         results = model.run(number_of_trajectories = TRAJECTORIES)
