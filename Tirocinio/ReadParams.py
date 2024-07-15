@@ -77,6 +77,17 @@ def readGenerations():
                 if parameter_type == "GENERATIONS":
                     return int(parameter_value)
 
+def readMaxLipid():
+    with open("input/params.txt", "r") as file:
+        for line in file:
+            columns = line.split('\t')
+            columns = [col.strip() for col in columns]
+
+            if len(columns) == 2:
+                parameter_type, parameter_value = columns
+                if parameter_type == "MAX_LIPID":
+                    return int(parameter_value)
+
 def quotes():
     quotes = [
         "Science is organised knowledge. Wisdom is organised life.",

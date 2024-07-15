@@ -1,7 +1,7 @@
 ===== Manutenzione simulatore =====
-1. Ultima generazione non viene stampata
-2. Verificare l'eventualità che la protocellula non si divida
-3. Q.ta di Lipide decisa nei params.txt
+OK - 1. Ultima generazione non viene stampata
+OK - 2. Verificare l'eventualità che la protocellula non si divida
+OK - 3. Q.ta di Lipide decisa nei params.txt
 
 ===== Ulteriori calcoli Excel =====
 1. Fare script per fare N simulazioni e non più una alla volta

@@ -157,6 +157,7 @@ def main():
     TRAJECTORIES = 1
     COEFF = readCoeff() # al posto di VOL ci mettiam (COEFF*LIPIDE)
     GENERATIONS = readGenerations() + 1
+    MAX_LIPID = readMaxLipid()
     
     SINTESI_FILE = 'output/sintesi.xlsx'
 
@@ -179,7 +180,7 @@ def main():
 
     # Inizializzo le liste e dizionari che conterranno tutte le informazioni lette da chimica.txt
     initialize(species, frequences, reactions, catalysis, events)
-    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events)
+    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, reactions, catalysis, events)
 
     # Creo il foglio dove scrivere i dati
     wb = Workbook()
@@ -222,9 +223,10 @@ def main():
         stopGeneration = False
         dummyValues = {} # Dizionario temporanea per salvare i valori delle specie
 
-        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events)
+        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, reactions, catalysis, events)
         
         os.system('cls' if os.name == 'nt' else 'clear')
+        totalGenerations = genCounter + 1
         # Non stampa la generazione non esistente
         if genCounter < GENERATIONS - 1:
             outputData(species, reactions, catalysis, events, frequences, genCounter)
@@ -327,11 +329,22 @@ def main():
     # Sistema le righe vuote e i valori delle specie
     fixExcel(ws, speciesColumn, catalysis, sintesiList)
     colorCells(ws)
-    removeLastGen(ws)
+
+    # Se le generazioni vengono fatte tutte quante allora rimuovo l'ultima generazione
+    if totalGenerations == GENERATIONS:
+        removeLastGen(ws)
+        moreGenerations = True
+    else:
+        # Colora l'ultima riga del file excel in arancione
+        last_row = ws.max_row
+        for cell in ws[last_row]:
+            cell.fill = PatternFill(start_color="FFA500", end_color="FFA500", fill_type="solid")
+        moreGenerations = False
 
     # Salva il file excel coi risultati
     wb.save(OUTPUT_FILE)
     
+    # ======= FILE SINTESI =======
     # Crea un nuovo file excel per la sintesi
     wb2 = Workbook()
     ws2 = wb2.active
@@ -351,9 +364,17 @@ def main():
 
     # Salva il file excel coi risultati della sintesi
     wb2.save(SINTESI_FILE)
-
-    print("\n########## SIMULAZIONE TERMINATA ##########\n")
-    quotes()
+    
+    # Se vengono fatte piu generazioni rispetto a quelle richieste sistemo il numero di generazioni totali
+    if moreGenerations:
+        print("\n########## SIMULAZIONE TERMINATA CON ", totalGenerations - 1, "GENERAZIONI ##########\n")
+    else:
+        print("\n########## SIMULAZIONE TERMINATA CON ", totalGenerations, "GENERAZIONI ##########\n")
+    
+    print("Il file excel con i risultati si trova in: ", OUTPUT_FILE)
+    print("Il file excel con i risultati della sintesi si trova in: ", SINTESI_FILE)
+    print("\n##############################################################\n")
+    #quotes()
     
 
 if __name__ == "__main__":

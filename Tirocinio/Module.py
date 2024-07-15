@@ -30,7 +30,7 @@ def addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactio
             reactions.append(reaction)
 
 
-def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events):
+def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, reactions, catalysis, events):
     # Inizializzo il modello
     model = gillespy2.Model()
 
@@ -147,7 +147,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, c
 
     ### EVENTI ###
     #   Aggiungo il trigger per l'evento di divisione
-    trig = gillespy2.EventTrigger(expression = "L > 500")       # L'evento si attiva quando l'espressione diventa FALSO (da VERO) o VERO (da Falso)
+    trig = gillespy2.EventTrigger(expression = "L > " + str(MAX_LIPID))       # L'evento si attiva quando l'espressione diventa FALSO (da VERO) o VERO (da Falso)
     
     #  Aggiungo gli eventi di divisione
     #print("EVENTI: ")
