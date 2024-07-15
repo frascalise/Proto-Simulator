@@ -53,7 +53,7 @@ def addEmptyRows(ws):
             insertRow = True
 
 
-def fixExcel(ws, speciesColumn, catalysis):
+def fixExcel(ws, speciesColumn, catalysis, sintesiList):
     lipidName = list(catalysis.keys())[0]
     #print("Il nome del lipide e': ", lipidName)
 
@@ -72,6 +72,7 @@ def fixExcel(ws, speciesColumn, catalysis):
     for row in range(2, ws.max_row + 1):
         if ws.cell(row=row, column=lipidKey).value is None:
             ws.cell(row=row, column=lipidKey).value = ws.cell(row=row+1, column=lipidKey).value*2
+            sintesiList.append(row)
     
     # Assegno i valori delle altre specie alle righe vuote appena create, ovvero il valore della riga successiva/0.35
     for i in range(2, len(speciesColumn.items())-2):
@@ -141,9 +142,11 @@ def main():
     POINTS = readPoints()
 #    TRAJECTORIES = readTrajectories()
     TRAJECTORIES = 1
-    COEFF = readCoeff()
+    COEFF = readCoeff() # al posto di VOL ci mettiam (COEFF*LIPIDE)
     GENERATIONS = readGenerations()
     
+    SINTESI_FILE = 'output/sintesi.xlsx'
+
     oldFile = INPUT_FILE    # Salva il file di input originale
 
     print("INPUT: ", INPUT_FILE)
@@ -304,13 +307,33 @@ def main():
     ws.insert_cols(2)
     ws.cell(row=1, column=2, value="ABSOLUTE TIME")
 
+    sintesiList = []
     # Sistema le righe vuote e i valori delle specie
-    fixExcel(ws, speciesColumn, catalysis)
+    fixExcel(ws, speciesColumn, catalysis, sintesiList)
     colorCells(ws)
 
-    # Salva il file excel
+    # Salva il file excel coi risultati
     wb.save(OUTPUT_FILE)
     
+    wb2 = Workbook()
+    ws2 = wb2.active
+    
+    # Copia la prima riga del file excel wb nel file excel wb2
+    for column in range(1, ws.max_column + 1):
+        value = ws.cell(row=1, column=column).value
+        ws2.cell(row=1, column=column, value=value)
+    
+    # Copia le righe contenute in sintesiList nel nuovo file excel wb2
+    for row_number in sintesiList:
+        row_values = []
+        for column in range(1, ws.max_column + 1):
+            value = ws.cell(row=row_number, column=column).value
+            row_values.append(value)
+        ws2.append(row_values)
+
+    # Salva il file excel coi risultati della sintesi
+    wb2.save(SINTESI_FILE)
+
     print("\n########## SIMULAZIONE TERMINATA ##########\n")
     quotes()
     
