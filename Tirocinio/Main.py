@@ -133,6 +133,19 @@ def colorCells(ws):
         cell.fill = PatternFill(start_color="8493B0", end_color="8493B0", fill_type="solid")
 
 
+# Rimuove l'ultima generazione in modo tale da sistemare il bug dell'ultima generazione non stampata
+def removeLastGen(ws):
+    # Trova l'ultima riga con lo sfondo giallo
+    last_yellow_row = None
+    for row in range(ws.max_row, 1, -1):
+        if ws.cell(row=row, column=1).fill.start_color.rgb == "00FFFF00":
+            last_yellow_row = row
+            break
+    
+    # Rimuovi le righe dal fondo fino all'ultima riga con lo sfondo giallo
+    if last_yellow_row is not None:
+        ws.delete_rows(last_yellow_row + 1, ws.max_row)
+
 def main():
 
     # Inizializzo i parametri che verranno poi letti in params.txt
@@ -143,7 +156,7 @@ def main():
 #    TRAJECTORIES = readTrajectories()
     TRAJECTORIES = 1
     COEFF = readCoeff() # al posto di VOL ci mettiam (COEFF*LIPIDE)
-    GENERATIONS = readGenerations()
+    GENERATIONS = readGenerations() + 1
     
     SINTESI_FILE = 'output/sintesi.xlsx'
 
@@ -210,8 +223,11 @@ def main():
         dummyValues = {} # Dizionario temporanea per salvare i valori delle specie
 
         model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, species, frequences, reactions, catalysis, events)
-        os.system('cls' if os.name == 'nt' else 'clear')
-        outputData(species, reactions, catalysis, events, frequences, genCounter)
+        
+        # Non stampa la generazione non esistente
+        if genCounter < GENERATIONS - 1:
+            os.system('cls' if os.name == 'nt' else 'clear')
+            outputData(species, reactions, catalysis, events, frequences, genCounter)
 
         results = model.run(number_of_trajectories = TRAJECTORIES)
         
@@ -311,10 +327,12 @@ def main():
     # Sistema le righe vuote e i valori delle specie
     fixExcel(ws, speciesColumn, catalysis, sintesiList)
     colorCells(ws)
+    removeLastGen(ws)
 
     # Salva il file excel coi risultati
     wb.save(OUTPUT_FILE)
     
+    # Crea un nuovo file excel per la sintesi
     wb2 = Workbook()
     ws2 = wb2.active
     
