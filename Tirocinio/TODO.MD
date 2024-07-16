@@ -4,7 +4,7 @@ OK - 2. Verificare l'eventualità che la protocellula non si divida
 OK - 3. Q.ta di Lipide decisa nei params.txt
 
 ===== Ulteriori calcoli Excel =====
-1. Fare script per fare N simulazioni e non più una alla volta
+OK - 1. Fare script per fare N simulazioni e non più una alla volta
 2. Calcolo distanza angolare 
 (matrice quadrata NxN con asse X e Y gli indici dei finali delle simulazioni, quando si calcola la distanza tra due vettori uguali la distanza e' 0 di default)
 
