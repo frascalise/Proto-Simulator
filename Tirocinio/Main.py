@@ -132,7 +132,6 @@ def colorCells(ws):
     for cell in ws[1]:
         cell.fill = PatternFill(start_color="8493B0", end_color="8493B0", fill_type="solid")
 
-
 # Rimuove l'ultima generazione in modo tale da sistemare il bug dell'ultima generazione non stampata
 def removeLastGen(ws):
     # Trova l'ultima riga con lo sfondo giallo
@@ -305,7 +304,7 @@ def main():
     if os.path.exists("input/KBVNRDL1Qp_Chimica.txt"):
         os.remove("input/KBVNRDL1Qp_Chimica.txt")
 
-    # ======= MANUTENZIONE FOGLIO EXCEL =======
+#** ======= MANUTENZIONE FOGLIO EXCEL =======
 
     # Aggiungo le righe vuote dopo ogni divisione 
     addEmptyRows(ws)
@@ -340,11 +339,12 @@ def main():
         for cell in ws[last_row]:
             cell.fill = PatternFill(start_color="FFA500", end_color="FFA500", fill_type="solid")
         moreGenerations = False
+        sintesiList.append(last_row)
 
     # Salva il file excel coi risultati
     wb.save(OUTPUT_FILE)
     
-    # ======= FILE SINTESI =======
+#** ======= FILE SINTESI =======
     # Crea un nuovo file excel per la sintesi
     wb2 = Workbook()
     ws2 = wb2.active
