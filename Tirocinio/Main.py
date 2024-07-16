@@ -158,7 +158,8 @@ def main():
     GENERATIONS = readGenerations() + 1
     MAX_LIPID = readMaxLipid()
     
-    SINTESI_FILE = 'output/sintesi.xlsx'
+    SINTESI_FILE = readSynthesis()
+    'output/sintesi.xlsx'
 
     oldFile = INPUT_FILE    # Salva il file di input originale
 
