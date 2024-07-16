@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt             # type: ignore
 from openpyxl.styles import PatternFill     # type: ignore
 from openpyxl import Workbook               # type: ignore
 
-from Module import *
-from ReadParams import *
+from modules.Module import *
+from modules.ReadParams import *
 
 
 def outputData(species, reactions, catalysis, events, frequences, genCounter):
