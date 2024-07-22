@@ -61,22 +61,25 @@ def angular_distance_data(synthesis_files):
     # Flag per indicare se la riga di intestazione è già stata copiata
     header_copied = False
     
-    for file in synthesis_files:
+    for i, file in enumerate(synthesis_files, start=1):
         wb = load_workbook(file)
         ws = wb.active
         
         if not header_copied:
             # Copia la riga di intestazione
             header = [cell.value for cell in ws[1]]
+            header.append("Generazioni")
             ws_new.append(header)
             header_copied = True
         
         # Prendi l'ultima riga del foglio
         last_row = [cell.value for cell in ws[ws.max_row]]
+        num_generations = ws.max_row - 1  # Numero di righe tolta la prima
+        last_row.append(num_generations)
         ws_new.append(last_row)
     
     # Rimuovi le colonne specificate
-    columns_to_remove = ["TIME", "ABSOLUTE TIME", "tempo"]
+    columns_to_remove = ["TIME", "ABSOLUTE TIME"]
     columns_to_delete = []
     
     for col in ws_new.iter_cols(min_row=1, max_row=1, max_col=ws_new.max_column):
