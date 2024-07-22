@@ -2,9 +2,8 @@ import math
 import os
 import platform
 import subprocess
-from openpyxl import Workbook, load_workbook               # type: ignore
-from openpyxl.styles import PatternFill     # type: ignore
-
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import PatternFill
 
 DISTANZA_ANGOLARE = "output/DistanzaAngolare.xlsx"
 
@@ -20,7 +19,6 @@ def write_params(file_path, params):
     with open(file_path, 'w') as file:
         for key, value in params.items():
             file.write(f"{key}\t{value}\n")
-
 
 def run_script(n, params_path):
     params = read_params(params_path)
@@ -53,7 +51,6 @@ def run_script(n, params_path):
     write_params(params_path, params)
     
     return synthesis_files
-
 
 def angular_distance_data(synthesis_files):
     # Inizializza il nuovo workbook
@@ -89,85 +86,30 @@ def angular_distance_data(synthesis_files):
     for col_num in reversed(columns_to_delete):  # Rimuovi le colonne dalla fine all'inizio
         ws_new.delete_cols(col_num)
     
+    # Inserisce la nuova colonna "Index Simulazione"
+    add_index_simulazione(ws_new)
+
     # Salva il nuovo file Excel
     wb_new.save(DISTANZA_ANGOLARE)
 
-
-def addIndexSimulazione(ws):
+def add_index_simulazione(ws):
     # Inserisce la nuova colonna "Index Simulazione"
     ws.insert_cols(1)
     ws.cell(row=1, column=1, value="Index Simulazione")
+    bg_fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
     
     # Popola la prima colonna con valori "Simulazione1", "Simulazione2", ecc.
     for i in range(2, ws.max_row + 1):
         ws.cell(row=i, column=1, value=f"Simulazione{i-1}")
     
     # Cambia il colore della prima riga
-    bg_fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
     for cell in ws[1]:
         cell.fill = bg_fill
 
-
-def angular_distance_calc():
-    wb = load_workbook(DISTANZA_ANGOLARE)
-    ws = wb.active
-
-    # Inserisce la nuova colonna "Index Simulazione"
-    addIndexSimulazione(ws)
-
-    # Salvo i dati di ogni simulazione in un dizionario
-    simulation_data = {}
-    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=2, max_col=ws.max_column):
-        sim_index = ws.cell(row=row[0].row, column=1).value
-        simulation_data[sim_index] = [cell.value for cell in row]
-    
-    # Creo il nuovo foglio "Distanza Angolare"
-    ws_new = wb.create_sheet("Distanza Angolare")
-    
-    # Ottengo l'elenco delle simulazioni
-    simulations = list(simulation_data.keys())
-    
-    # Inserisco l'intestazione della matrice
-    ws_new.cell(row=1, column=1, value="Index")
-    for i in range(2, len(simulations) + 2):
-        ws_new.cell(row=1, column=i, value=simulations[i-2])
-        ws_new.cell(row=i, column=1, value=simulations[i-2])
-    
-    # Cambio colore della prima riga e della prima colonna
-    bg_fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
-    for cell in ws_new[1]:
-        cell.fill = bg_fill
-    for row in ws_new.iter_rows(min_col=1, max_col=1):
+    # Cambia il colore della prima colonna
+    for row in ws.iter_rows(min_col=1, max_col=1, min_row=2, max_row=ws.max_row):
         for cell in row:
             cell.fill = bg_fill
-    
-    # Calcolo della distanza angolare (coseno dell'angolo tra i vettori)
-    for i in range(len(simulations)):
-        sim1 = simulations[i]
-        vector1 = simulation_data[sim1]
-        ws_new.cell(row=i + 2, column=i + 2, value=0)  # Diagonale principale = 0 (distanza con se stesso)
-        
-        for j in range(i + 1, len(simulations)):
-            sim2 = simulations[j]
-            vector2 = simulation_data[sim2]
-            
-            # Calcolo il coseno dell'angolo tra i vettori
-            dot_product = sum(a * b for a, b in zip(vector1, vector2))
-            magnitude1 = math.sqrt(sum(a**2 for a in vector1))
-            magnitude2 = math.sqrt(sum(b**2 for b in vector2))
-            
-            # Calcolo il coseno dell'angolo (distanza angolare)
-            if magnitude1 != 0 and magnitude2 != 0:
-                cosine_angle = dot_product / (magnitude1 * magnitude2)
-            else:
-                cosine_angle = None  # Gestione del caso di divisione per zero
-            
-            ws_new.cell(row=i + 2, column=j + 2, value=cosine_angle)
-            ws_new.cell(row=j + 2, column=i + 2, value=cosine_angle)
-    
-    # Salvo il file Excel
-    wb.save(DISTANZA_ANGOLARE)
-    
 
 def play_beep():
     if platform.system() == 'Windows':
@@ -182,7 +124,6 @@ def play_beep():
     else:
         print("Sistema operativo non supportato per la riproduzione del suono.")
 
-
 if __name__ == "__main__":
     # ** ESEGUO N VOLTE LA SIMULAZIONE **
     params_path = 'input/params.txt'
@@ -192,7 +133,6 @@ if __name__ == "__main__":
 
     # ** CALCOLO LA DISTANZA ANGOLARE **
     angular_distance_data(synthesis_files)
-    angular_distance_calc()
-    print(f"Distanza angolare salvata in {DISTANZA_ANGOLARE}\n")
+    print(f"Dati delle simulazioni salvati in {DISTANZA_ANGOLARE}\n")
 
     play_beep()
