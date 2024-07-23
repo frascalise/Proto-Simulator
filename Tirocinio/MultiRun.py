@@ -1,4 +1,3 @@
-import math
 import os
 import platform
 import subprocess
@@ -6,6 +5,7 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill
 
 DISTANZA_ANGOLARE = "output/DistanzaAngolare.xlsx"
+ANGULAR_PARAMS = "input/AngularParams.txt"
 
 def read_params(file_path):
     params = {}
@@ -61,22 +61,25 @@ def angular_distance_data(synthesis_files):
     # Flag per indicare se la riga di intestazione è già stata copiata
     header_copied = False
     
-    for i, file in enumerate(synthesis_files, start=1):
+    max_generations = 0
+
+    for file in synthesis_files:
         wb = load_workbook(file)
         ws = wb.active
         
         if not header_copied:
             # Copia la riga di intestazione
             header = [cell.value for cell in ws[1]]
-            header.append("Generazioni")
             ws_new.append(header)
             header_copied = True
         
         # Prendi l'ultima riga del foglio
         last_row = [cell.value for cell in ws[ws.max_row]]
-        num_generations = ws.max_row - 1  # Numero di righe tolta la prima
-        last_row.append(num_generations)
         ws_new.append(last_row)
+
+        # Calcola il numero di generazioni
+        generations = ws.max_row - 1
+        max_generations = max(max_generations, generations)
     
     # Rimuovi le colonne specificate
     columns_to_remove = ["TIME", "ABSOLUTE TIME"]
@@ -89,11 +92,15 @@ def angular_distance_data(synthesis_files):
     for col_num in reversed(columns_to_delete):  # Rimuovi le colonne dalla fine all'inizio
         ws_new.delete_cols(col_num)
     
-    # Inserisce la nuova colonna "Index Simulazione"
+    # Inserisce la nuova colonna "Index Simulazione" e "Generazioni"
     add_index_simulazione(ws_new)
+    add_generazioni(ws_new, max_generations)
 
     # Salva il nuovo file Excel
     wb_new.save(DISTANZA_ANGOLARE)
+
+    # Scrive il numero di generazioni nel file AngularParams.txt
+    write_angular_params(max_generations)
 
 def add_index_simulazione(ws):
     # Inserisce la nuova colonna "Index Simulazione"
@@ -113,6 +120,26 @@ def add_index_simulazione(ws):
     for row in ws.iter_rows(min_col=1, max_col=1, min_row=2, max_row=ws.max_row):
         for cell in row:
             cell.fill = bg_fill
+
+def add_generazioni(ws, max_generations):
+    # Inserisce la nuova colonna "Generazioni"
+    ws.insert_cols(2)
+    ws.cell(row=1, column=2, value="Generazioni")
+    bg_fill = PatternFill(start_color="ffcccb", end_color="ffcccb", fill_type="solid")
+    
+    # Popola la colonna "Generazioni"
+    for i in range(2, ws.max_row + 1):
+        ws.cell(row=i, column=2, value=max_generations)
+    
+    # Cambia il colore della colonna "Generazioni"
+    for row in ws.iter_rows(min_col=2, max_col=2, min_row=1, max_row=ws.max_row):
+        for cell in row:
+            cell.fill = bg_fill
+
+def write_angular_params(generations):
+    with open(ANGULAR_PARAMS, 'w') as file:
+        file.write(f"GENERATIONS\t{generations}\n")
+        file.write("SPECIES\tA\n")
 
 def play_beep():
     if platform.system() == 'Windows':
