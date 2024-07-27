@@ -118,12 +118,58 @@ def calculate_angular_distance(ws, species):
                 # Calcola l'angolo (distanza angolare) in gradi
                 if magnitude1 != 0 and magnitude2 != 0:
                     cosine_angle = dot_product / (magnitude1 * magnitude2)
+                    # Corregge il valore del coseno per rimanere entro il dominio valido
+                    cosine_angle = max(min(cosine_angle, 1.0), -1.0)
                     angle = math.degrees(math.acos(cosine_angle))
                 else:
                     angle = "Non Valida"  # Gestione del caso di divisione per zero
             
             distance_sheet.cell(row=i + 2, column=j + 2, value=angle)
             distance_sheet.cell(row=j + 2, column=i + 2, value=angle)
+def read_total_simulations(file_path):
+    total_sim = 0
+    with open(file_path, 'r') as file:
+        for line in file:
+            key, value = line.strip().split()
+            if key == "TOTAL_SIM":
+                total_sim = int(value)
+    return total_sim
+
+def update_and_reorder_distance_matrices(wb, total_simulations):
+    for sheet in wb.sheetnames:
+        if sheet.startswith("Distanza Angolare Dati Gen"):
+            ws = wb[sheet]
+            
+            # Leggi le intestazioni esistenti
+            existing_headers = [cell.value for cell in ws[1]]
+            existing_simulations = existing_headers[1:]  # Le intestazioni delle colonne sono dalla colonna 2 in poi
+
+            # Trova tutte le simulazioni
+            all_simulations = [f"Sim{i}" for i in range(1, total_simulations + 1)]
+
+            # Aggiungi righe e colonne mancanti
+            new_headers = existing_headers[:]
+            for sim in all_simulations:
+                if sim not in existing_simulations:
+
+                    # Aggiungi colonna
+                    col_idx = all_simulations.index(sim) + 2
+                    ws.insert_cols(col_idx)
+                    ws.cell(row=1, column=col_idx, value=sim)
+                    new_headers.append(sim)
+                    
+                    # Aggiungi riga
+                    row_idx = all_simulations.index(sim) + 2
+                    ws.insert_rows(row_idx)
+                    ws.cell(row=row_idx, column=1, value=sim)
+    
+            # Colora la prima riga e la prima colonna di blu
+            blue_fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+            for cell in ws[1]:
+                cell.fill = blue_fill
+            for row in ws.iter_rows(min_col=1, max_col=1):
+                for cell in row:
+                    cell.fill = blue_fill
 
 def main():
     species, num_generations = read_species_and_generations(ANGULAR_PARAMS)
@@ -148,6 +194,18 @@ def main():
     for sheet in wb.sheetnames:
         if sheet.startswith("Dati Gen"):
             calculate_angular_distance(wb[sheet], species)
+
+    # Leggi TOTAL_SIM dal file di parametri
+    def read_total_simulations(file_path):
+        with open(file_path, 'r') as file:
+            for line in file:
+                if line.startswith("TOTAL_SIM"):
+                    _, value = line.strip().split()
+                    return int(value)
+        return 0
+
+    total_simulations = read_total_simulations(ANGULAR_PARAMS)
+    update_and_reorder_distance_matrices(wb, total_simulations)
 
     try:
         wb.save(DISTANZA_ANGOLARE)

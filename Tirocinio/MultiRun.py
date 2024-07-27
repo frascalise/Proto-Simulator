@@ -116,6 +116,10 @@ def write_angular_params(generations):
         file.write(f"GENERATIONS\t{generations}\n")
         file.write("SPECIES\tA\n")
 
+def write_total_simulations(file_path, total_simulations):
+    with open(file_path, 'a') as file:
+        file.write(f"TOTAL_SIM\t{total_simulations}\n")
+
 def play_beep():
     if platform.system() == 'Windows':
         import winsound
@@ -139,5 +143,8 @@ if __name__ == "__main__":
     # ** CALCOLO LA DISTANZA ANGOLARE **
     angular_distance_data(synthesis_files)
     print(f"Dati delle simulazioni salvati in {DISTANZA_ANGOLARE}\n")
+
+    # ** SCRIVO IL NUMERO TOTALE DI SIMULAZIONI IN ANGULAR_PARAMS **
+    write_total_simulations(ANGULAR_PARAMS, n)
 
     play_beep()
