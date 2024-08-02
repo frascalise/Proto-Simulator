@@ -126,6 +126,7 @@ def calculate_angular_distance(ws, species):
             
             distance_sheet.cell(row=i + 2, column=j + 2, value=angle)
             distance_sheet.cell(row=j + 2, column=i + 2, value=angle)
+            
 def read_total_simulations(file_path):
     total_sim = 0
     with open(file_path, 'r') as file:
@@ -171,6 +172,19 @@ def update_and_reorder_distance_matrices(wb, total_simulations):
                 for cell in row:
                     cell.fill = blue_fill
 
+def update_datiGen(wb, total_simulations):
+    rowNames = []
+    for i in range(1, total_simulations + 1):
+        rowNames.append(f"Sim{i}")
+    
+    for sheet in wb.sheetnames:
+        if sheet.startswith("Dati Gen"):
+            ws = wb[sheet]
+            for i in range(1, total_simulations + 1):
+                if ws.cell(row=i + 1, column=1).value != rowNames[i - 1]:
+                    ws.insert_rows(i + 1)
+                    ws.cell(row=i + 1, column=1, value=rowNames[i - 1])
+
 def main():
     species, num_generations = read_species_and_generations(ANGULAR_PARAMS)
     if not species:
@@ -206,6 +220,15 @@ def main():
 
     total_simulations = read_total_simulations(ANGULAR_PARAMS)
     update_and_reorder_distance_matrices(wb, total_simulations)
+    update_datiGen(wb, total_simulations)
+
+    # Colora la prima colonna di blu
+    for sheet in wb.sheetnames:
+        if sheet.startswith("Dati Gen"):
+            ws = wb[sheet]
+            blue_fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+            for i in range(0, total_simulations + 1):
+                ws.cell(row=i + 1, column=1).fill = blue_fill
 
     try:
         wb.save(DISTANZA_ANGOLARE)
