@@ -99,6 +99,17 @@ def readMaxLipid():
                 if parameter_type == "MAX_LIPID":
                     return int(parameter_value)
 
+def readTotalSim():
+    with open("input/AngularParams.txt", "r") as file:
+        for line in file:
+            columns = line.split('\t')
+            columns = [col.strip() for col in columns]
+
+            if len(columns) == 2:
+                parameter_type, parameter_value = columns
+                if parameter_type == "TOTAL_SIM":
+                    return int(parameter_value)
+
 def quotes():
     quotes = [
         "Science is organised knowledge. Wisdom is organised life.",

@@ -53,7 +53,7 @@ def addEmptyRows(ws):
             insertRow = True
 
 
-def fixExcel(ws, speciesColumn, catalysis, sintesiList):
+def fixExcel(ws, speciesColumn, catalysis):
     lipidName = list(catalysis.keys())[0]
     #print("Il nome del lipide e': ", lipidName)
 
@@ -72,7 +72,6 @@ def fixExcel(ws, speciesColumn, catalysis, sintesiList):
     for row in range(2, ws.max_row + 1):
         if ws.cell(row=row, column=lipidKey).value is None:
             ws.cell(row=row, column=lipidKey).value = ws.cell(row=row+1, column=lipidKey).value*2
-            sintesiList.append(row)
     
     # Assegno i valori delle altre specie alle righe vuote appena create, ovvero il valore della riga successiva/0.35
     for i in range(2, len(speciesColumn.items())-2):
@@ -90,7 +89,6 @@ def fixExcel(ws, speciesColumn, catalysis, sintesiList):
                     ws.cell(row=row, column=column+1).value = 0 + ws.cell(row=row-1, column=column+1).value
                 else:
                     ws.cell(row=row, column=column+1).value = absoluteTimeAdd + ws.cell(row=row-1, column=column+1).value
-
 
 def addAbsoluteTime(ws):
     # Aggiungi una colonna tra la 1 e la 2 al file excel
@@ -144,6 +142,42 @@ def removeLastGen(ws):
     # Rimuovi le righe dal fondo fino all'ultima riga con lo sfondo giallo
     if last_yellow_row is not None:
         ws.delete_rows(last_yellow_row + 1, ws.max_row)
+
+
+def findDivision(ws, sintesiList, speciesColumn, catalysis):
+    
+    lipideColumn = None
+
+    for key, value in speciesColumn.items():
+        if value == list(catalysis.keys())[0]:
+            lipideColumn = key
+            break
+    
+    # print("Lipide column: ", lipideColumn)
+    # print("Lipide name: ", list(catalysis.keys())[0])
+
+    if lipideColumn is not None:
+        for row in range(3, ws.max_row + 1):
+            lipideValue = ws.cell(row=row, column=lipideColumn+1).value
+            previousLipideValue = ws.cell(row=row-1, column=lipideColumn+1).value
+            if lipideValue is not None and previousLipideValue is not None and int(lipideValue) < int(previousLipideValue):
+                sintesiList.append(row)
+    else:
+        print("Lipide column not found in speciesColumn.")
+
+    # print("Righe massime: ", ws.max_row)
+    # input("Premi invio per continuare...")
+
+def fixLipid(ws, sintesiList, speciesColumn, catalysis):
+    lipideColumn = None
+    # Trova la colonna del lipide
+    for key, value in speciesColumn.items():
+        if value == list(catalysis.keys())[0]:
+            lipideColumn = key
+            break
+    
+    for i in sintesiList:
+        ws.cell(row=i-1, column=lipideColumn+1).value = ws.cell(row=i, column=lipideColumn+1).value*2
 
 def main():
 
@@ -325,15 +359,18 @@ def main():
     ws.insert_cols(2)
     ws.cell(row=1, column=2, value="ABSOLUTE TIME")
 
-    sintesiList = []
     # Sistema le righe vuote e i valori delle specie
-    fixExcel(ws, speciesColumn, catalysis, sintesiList)
+    fixExcel(ws, speciesColumn, catalysis)
     colorCells(ws)
 
+    sintesiList = []
+    findDivision(ws, sintesiList, speciesColumn, catalysis)
+    
     # Se le generazioni vengono fatte tutte quante allora rimuovo l'ultima generazione
     if totalGenerations == GENERATIONS:
         removeLastGen(ws)
         moreGenerations = True
+        sintesiList.pop()
     else:
         # Colora l'ultima riga del file excel in arancione
         last_row = ws.max_row
@@ -342,9 +379,11 @@ def main():
         moreGenerations = False
         sintesiList.append(last_row)
 
+    fixLipid(ws, sintesiList, speciesColumn, catalysis)
+
     # Salva il file excel coi risultati
     wb.save(OUTPUT_FILE)
-    
+
 #** ======= FILE SINTESI =======
     # Crea un nuovo file excel per la sintesi
     wb2 = Workbook()
@@ -374,6 +413,8 @@ def main():
     
     print("Il file excel con i risultati si trova in: ", OUTPUT_FILE)
     print("Il file excel con i risultati della sintesi si trova in: ", SINTESI_FILE)
+    # print("Righe di sintesi: ", sintesiList)
+    # print("Righe totali: ", len(sintesiList))
     print("\n##############################################################\n")
     #quotes()
     

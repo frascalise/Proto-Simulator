@@ -1,12 +1,14 @@
 import os
 import math
-from openpyxl import load_workbook, Workbook
-from openpyxl.styles import PatternFill
+from openpyxl import load_workbook, Workbook        # type: ignore
+from openpyxl.styles import PatternFill             # type: ignore
 from modules.ReadParams import readSynthesis  # Importa la funzione readSynthesis
+from modules.ReadParams import readTotalSim  # Importa la funzione readTotalSim
 
 DISTANZA_ANGOLARE = "output/DistanzaAngolare.xlsx"
 ANGULAR_PARAMS = "input/AngularParams.txt"
 SINTESI = readSynthesis()
+TOTAL_SIM = readTotalSim()
 
 def read_species_and_generations(file_path):
     species = []
@@ -20,10 +22,10 @@ def read_species_and_generations(file_path):
                 generations = int(value)
     return species, generations
 
-def load_synthesis_files(synthesis_base_name, num_generations):
+def load_synthesis_files():
     synthesis_data = {}
-    base_name = os.path.splitext(synthesis_base_name)[0]
-    for i in range(1, num_generations + 1):
+    base_name = os.path.splitext(SINTESI)[0]
+    for i in range(1, TOTAL_SIM + 1):
         synthesis_file = f"{base_name}_Sim{i}.xlsx"
         if os.path.exists(synthesis_file):
             wb = load_workbook(synthesis_file)
@@ -74,6 +76,7 @@ def create_generation_sheets(wb, synthesis_data, num_generations, species):
                     ws.cell(row=row_num, column=col_num, value=cell_value)
                 row_num += 1
 
+#** Calcola la distanza angolare tra le simulazioni
 def calculate_angular_distance(ws, species):
     rows = list(ws.iter_rows(values_only=True))
     headers = rows[0]
@@ -126,7 +129,8 @@ def calculate_angular_distance(ws, species):
             
             distance_sheet.cell(row=i + 2, column=j + 2, value=angle)
             distance_sheet.cell(row=j + 2, column=i + 2, value=angle)
-            
+
+#** Legge il numero totale di simulazioni dal file di parametri
 def read_total_simulations(file_path):
     total_sim = 0
     with open(file_path, 'r') as file:
@@ -136,6 +140,7 @@ def read_total_simulations(file_path):
                 total_sim = int(value)
     return total_sim
 
+#** Aggiorno e riordino le matrici delle distanze angolari, aggiungendo le simulazioni morte
 def update_and_reorder_distance_matrices(wb, total_simulations):
     for sheet in wb.sheetnames:
         if sheet.startswith("Distanza Angolare Dati Gen"):
@@ -172,6 +177,7 @@ def update_and_reorder_distance_matrices(wb, total_simulations):
                 for cell in row:
                     cell.fill = blue_fill
 
+#** Aggiorno i dati dei fogli excel Dati GenX con i nomi delle simulazioni morte
 def update_datiGen(wb, total_simulations):
     rowNames = []
     for i in range(1, total_simulations + 1):
@@ -185,13 +191,115 @@ def update_datiGen(wb, total_simulations):
                     ws.insert_rows(i + 1)
                     ws.cell(row=i + 1, column=1, value=rowNames[i - 1])
 
+#** Sistemo il foglio excel Sintesi
+def blankSintesiSheet(ws, num_generations, total_simulations):
+#* Prima tabella coi dati del foglio excel Sintesi
+    # Scrivo la prima riga del foglio excel Sintesi
+    ws.cell(row=1, column=1, value="Angoli")
+    for i in range(1, num_generations + 1):
+        ws.cell(row=1, column=i + 1, value=f"Gen{i}")
+        ws.cell(row=1, column=i + 1).fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+    
+    # Scrivo i tipi di valori delle varie righe
+    ws.cell(row=2, column=1, value="Min")
+    ws.cell(row=3, column=1, value="Media")
+    ws.cell(row=4, column=1, value="Mediana")
+    ws.cell(row=5, column=1, value="Max")
+    ws.cell(row=6, column=1, value="Dev. Std.")
+    ws.cell(row=7, column=1, value="Sim Vive")
+    # La riga 8 è vuota
+#* Seconda tabella coi tempi del foglio excel Sintesi
+    ws.cell(row=9, column=1, value="Tempo")
+    for i in range(1, num_generations + 1):
+        ws.cell(row=9, column=i + 1, value=f"Gen{i}")
+        ws.cell(row=9, column=i + 1).fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+    
+    for i in range(1, total_simulations + 1):
+        ws.cell(row=9 + i, column=1, value=f"Sim{i}")
+        ws.cell(row=9 + i, column=1).fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+    
+    # Coloro le righe 2-7 di blu
+    for i in range(2, 8):
+        ws.cell(row=i, column=1).fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+
+    # Coloro le rimanenti celle di blu
+    ws.cell(row=1, column=1).fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+    ws.cell(row=9, column=1).fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
+
+#** Calcolo della mediana
+def calculate_median(values):
+    sorted_values = sorted(values)
+    n = len(sorted_values)
+    midpoint = n // 2
+    
+    if n % 2 == 0:  # Se pari, la mediana è la media dei due valori centrali
+        return (sorted_values[midpoint - 1] + sorted_values[midpoint]) / 2
+    else:  # Se dispari, la mediana è il valore centrale
+        return sorted_values[midpoint]
+
+#** Calcolo della deviazione standard
+def calculate_standard_deviation(values, mean):
+    variance = sum((x - mean) ** 2 for x in values) / len(values)
+    return math.sqrt(variance)
+
+#** Creo il foglio excel Sintesi
+def sintesiSheet(wb, total_simulations, num_generations):
+    ws = wb.create_sheet("Sintesi")
+    wb._sheets.remove(ws)
+    wb._sheets.insert(1, ws)
+
+    blankSintesiSheet(ws, num_generations, total_simulations)
+
+#*  Trascrivo i tempi delle varie simulazioni (seconda tabella del foglio excel Sintesi)
+    for i in range(1, num_generations + 1):
+        wsDatiGen = wb[f"Dati Gen{i}"]  # Apro i vari fogli "Dati Gen" per prendere i tempi
+        
+        for j in range(1, wsDatiGen.max_column + 1):    # Cerco la colonna "tempo" nel foglio Dati Gen
+            if wsDatiGen.cell(row=1, column=j).value == "tempo":
+                for k in range(1, wsDatiGen.max_row):   # Quando trovo la colonna "tempo" trascrivo i tempi
+                    ws.cell(row=9+k, column=i+1).value = wsDatiGen.cell(row=k+1, column=j).value
+
+#*  Trascrivo i dati delle varie distanze angolari (prima tabella del foglio excel Sintesi)
+    rows, cols = total_simulations, total_simulations   # Righe e colonne della matrice delle distanze angolari
+    for i in range(1, num_generations + 1): 
+        wsDistanzaAngolare = wb[f"Distanza Angolare Dati Gen{i}"]   # Apro i vari fogli "Distanza Angolare Dati Gen" per prendere i dati
+        matrix = [[None for _ in range(cols)] for _ in range(rows)] # Inizializzo la matrice delle distanze angolari nulla
+        
+        for j in range(1, total_simulations + 1):
+            for k in range(1, total_simulations + 1):
+                if j != k:
+                    matrix[j-2][k-2] = wsDistanzaAngolare.cell(row=j+1, column=k+1).value
+
+        # Estrazione dei valori non nulli
+        values = [x for row in matrix for x in row if x is not None]
+
+        # Calcolo i valori richiesti
+        minimo = min(values)
+        massimo = max(values)
+        media = sum(values) / len(values)
+        mediana = calculate_median(values)
+        devStd = calculate_standard_deviation(values, media)
+
+        simVive = 0
+        wsDatiGen = wb[f"Dati Gen{i}"]  # Apro i vari fogli "Dati Gen" per contare il numero di simulazioni vive
+        for z in range(2, wsDatiGen.max_row + 1):
+            if wsDatiGen.cell(row=z, column=2).value is not None:
+                simVive = simVive + 1
+
+        # Scrivo i valori calcolati
+        ws.cell(row=2, column=i+1, value=minimo)
+        ws.cell(row=3, column=i+1, value=media)
+        ws.cell(row=4, column=i+1, value=mediana)
+        ws.cell(row=5, column=i+1, value=massimo)
+        ws.cell(row=6, column=i+1, value=devStd)
+        ws.cell(row=7, column=i+1, value=simVive)
+    
 def main():
     species, num_generations = read_species_and_generations(ANGULAR_PARAMS)
     if not species:
         print("Nessuna specie trovata nel file di parametri.")
         return
-    
-    synthesis_data = load_synthesis_files(SINTESI, num_generations)
+    synthesis_data = load_synthesis_files()
     if not synthesis_data:
         print("Nessun file di sintesi trovato.")
         return
@@ -229,6 +337,10 @@ def main():
             blue_fill = PatternFill(start_color="4287f5", end_color="4287f5", fill_type="solid")
             for i in range(0, total_simulations + 1):
                 ws.cell(row=i + 1, column=1).fill = blue_fill
+
+    sintesiSheet(wb, total_simulations, num_generations)
+    print("Total simulations: ", total_simulations)
+    print("Num generations: ", num_generations)
 
     try:
         wb.save(DISTANZA_ANGOLARE)

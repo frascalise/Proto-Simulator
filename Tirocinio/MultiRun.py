@@ -3,9 +3,11 @@ import platform
 import subprocess
 from openpyxl import Workbook, load_workbook
 from openpyxl.styles import PatternFill, Color
+from modules.ReadParams import readGenerations
 
 DISTANZA_ANGOLARE = "output/DistanzaAngolare.xlsx"
 ANGULAR_PARAMS = "input/AngularParams.txt"
+GENERATIONS = readGenerations()
 
 def read_params(file_path):
     params = {}
@@ -113,12 +115,13 @@ def format_sheet(ws):
 # Scrivo i parametri del file AngularParams.txt
 def write_angular_params(generations):
     with open(ANGULAR_PARAMS, 'w') as file:
-        file.write(f"GENERATIONS\t{generations}\n")
-        file.write("SPECIES\tA\n")
+        file.write("SPECIES\tA,B\n")
 
 def write_total_simulations(file_path, total_simulations):
     with open(file_path, 'a') as file:
         file.write(f"TOTAL_SIM\t{total_simulations}\n")
+        file.write(f"GENERATIONS\t{GENERATIONS}\n")
+
 
 def play_beep():
     if platform.system() == 'Windows':
