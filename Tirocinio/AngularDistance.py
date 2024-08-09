@@ -274,11 +274,14 @@ def sintesiSheet(wb, total_simulations, num_generations):
         values = [x for row in matrix for x in row if x is not None]
 
         # Calcolo i valori richiesti
-        minimo = min(values)
-        massimo = max(values)
-        media = sum(values) / len(values)
-        mediana = calculate_median(values)
-        devStd = calculate_standard_deviation(values, media)
+        if values:
+            minimo = min(values)
+            massimo = max(values)
+            media = sum(values) / len(values)
+            mediana = calculate_median(values)
+            devStd = calculate_standard_deviation(values, media)
+        else:
+            minimo = massimo = media = mediana = devStd = None
 
         simVive = 0
         wsDatiGen = wb[f"Dati Gen{i}"]  # Apro i vari fogli "Dati Gen" per contare il numero di simulazioni vive

@@ -374,12 +374,24 @@ def main():
     else:
         # Colora l'ultima riga del file excel in arancione
         last_row = ws.max_row
-        for cell in ws[last_row]:
+        # Rimuovo l'ultima riga perchè non è stata completata la generazione e non ci vuole
+        ws.delete_rows(last_row)
+        sintesiList.append(last_row-1)
+        
+        for cell in ws[last_row-1]:
             cell.fill = PatternFill(start_color="FFA500", end_color="FFA500", fill_type="solid")
         moreGenerations = False
-        sintesiList.append(last_row)
 
     fixLipid(ws, sintesiList, speciesColumn, catalysis)
+
+    if totalGenerations != GENERATIONS:
+        # Cerco la colonna del lipide
+        lipideColumn = None
+        for key, value in speciesColumn.items():
+            if value == list(catalysis.keys())[0]:
+                lipideColumn = key
+                break
+        ws.cell(row=ws.max_row-1, column=lipideColumn+1).value = ws.cell(row=ws.max_row-1, column=lipideColumn+1).value/2
 
     # Salva il file excel coi risultati
     wb.save(OUTPUT_FILE)
@@ -401,6 +413,24 @@ def main():
             value = ws.cell(row=row_number, column=column).value
             row_values.append(value)
         ws2.append(row_values)
+
+    # Sistemo la colonna TIME
+    TimeColumn = None
+    for i in range(1, ws2.max_column + 1):
+        if ws2.cell(row=1, column=i).value == "TIME":
+            TimeColumn = i
+            break
+    
+    for i in range(2, ws2.max_row + 1):
+        if ws.cell(row=sintesiList[i-2], column=TimeColumn).value == 0:
+            ws2.cell(row=i, column=TimeColumn).value = ws.cell(row=sintesiList[i-2]-1, column=TimeColumn).value
+        else:
+            ws2.cell(row=i, column=TimeColumn).value = ws.cell(row=sintesiList[i-2], column=TimeColumn).value
+
+    # Se le generazioni vengono fatte tutte quante allora rimuovo l'ultima generazione
+    if totalGenerations != GENERATIONS:
+        # Elimino l'ultima riga del file excel wb2
+        ws2.delete_rows(ws2.max_row)
 
     # Salva il file excel coi risultati della sintesi
     wb2.save(SINTESI_FILE)
