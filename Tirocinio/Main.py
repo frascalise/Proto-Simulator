@@ -432,6 +432,17 @@ def main():
         # Elimino l'ultima riga del file excel wb2
         ws2.delete_rows(ws2.max_row)
 
+    # Moltiplico le specie *0.35 e il lipide *2 in modo tale da avere i dati della protocellula genitrice
+    # Se si vogliono i dati della protocellula figlia allora commentare le righe qua sotto
+    for i in range(2, ws2.max_row + 1):
+        for j in range(2, ws2.max_column + 1):
+            if ws2.cell(row=i, column=j).value is not None:
+                if ws.cell(row=1, column=j).value != "tempo" and ws.cell(row=1, column=j).value != "ABSOLUTE TIME" and ws.cell(row=1, column=j).value != "TIME":
+                    if speciesColumn[j-1] == list(catalysis.keys())[0]:
+                        ws2.cell(row=i, column=j).value = ws2.cell(row=i, column=j).value*2
+                    else:
+                        ws2.cell(row=i, column=j).value = int(ws2.cell(row=i, column=j).value/0.35)
+
     # Salva il file excel coi risultati della sintesi
     wb2.save(SINTESI_FILE)
     
