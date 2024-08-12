@@ -110,6 +110,29 @@ def readTotalSim():
                 if parameter_type == "TOTAL_SIM":
                     return int(parameter_value)
 
+def readDivision():
+    with open("input/params.txt", "r") as file:
+        for line in file:
+            columns = line.split('\t')
+            columns = [col.strip() for col in columns]
+
+            if len(columns) == 2:
+                parameter_type, parameter_value = columns
+                if parameter_type == "DIVISION":
+                    return float(parameter_value)
+
+def readLipidExp():
+    with open("input/params.txt", "r") as file:
+        for line in file:
+            columns = line.split('\t')
+            columns = [col.strip() for col in columns]
+
+            if len(columns) == 2:
+                parameter_type, parameter_value = columns
+                if parameter_type == "LIPID_EXP":
+                    return float(parameter_value)
+
+
 def quotes():
     quotes = [
         "Science is organised knowledge. Wisdom is organised life.",

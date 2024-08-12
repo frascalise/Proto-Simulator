@@ -30,7 +30,7 @@ def addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactio
             reactions.append(reaction)
 
 
-def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, reactions, catalysis, events):
+def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events):
     # Inizializzo il modello
     model = gillespy2.Model()
 
@@ -96,6 +96,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, r
             #   propensityFunction: e' la stringa che contiene la formula da inserire in propensityFunction e viene costruita a seconda
             #                       della reazione che consideriamo (vedi formule sopra)
             #   AGGIORNAMENTO 05-05-2024: Al posto di vol inserisco COEFF*lipidName
+            #   AGGIORNAMENTO 12-08-2024: Al posto di COEFF*lipidName inserisco COEFF*(lipidName^1.5)
 
             reactantsNumber = len(reactants)    
             propensityFunction = str(frequences[reactionCounter].name)
@@ -106,10 +107,10 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, r
                     propensityFunction += "*" + str(i)
 
                 if reactantsNumber > 1:
-                    propensityFunction += "/(" + "(" + str(COEFF) + "*" + str(lipidName) + ")"
+                    propensityFunction += "/(" + "(" + str(COEFF) + "*(" + str(lipidName) + "^" + str(LIPID_EXP) + "))"
 
                     for i in range(1, (reactantsNumber - 1)):
-                        propensityFunction += "*" + "(" + str(COEFF) + "*" + str(lipidName) + ")"
+                        propensityFunction += "*" + "(" + str(COEFF) + "*(" + str(lipidName) + "^" + str(LIPID_EXP) + "))"
 
                     propensityFunction += ")"
 
@@ -157,9 +158,9 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, r
     events.append(evento)
     #print(evento)
 
-    # Con questo ciclo for simulo l'avvenimento di una divisione dividendo tutte le specie per 0.35
+    # Con questo ciclo for simulo l'avvenimento di una divisione dividendo tutte le specie per DIVISION
     for species_name in list(catalysis.keys())[1:]:
-        evento = gillespy2.EventAssignment(variable = species_name, expression = f"{species_name}*0.35")
+        evento = gillespy2.EventAssignment(variable = species_name, expression = f"{species_name}*"+ str(DIVISION))
         events.append(evento)
         #print(evento)
     
