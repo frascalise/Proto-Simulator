@@ -1,15 +1,6 @@
-<<<<<<< HEAD
 .DS_Store
 */__pycache__/
 input/
 output/
 .vscode/
 Tirocinio/TODO.MD
-=======
-.DS_Store
-*/__pycache__/
-input/
-output/
-.vscode/
-Tirocinio/TODO.MD
->>>>>>> refs/remotes/origin/main
