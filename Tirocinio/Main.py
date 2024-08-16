@@ -53,7 +53,7 @@ def addEmptyRows(ws):
             insertRow = True
 
 
-def fixExcel(ws, speciesColumn, catalysis):
+def fixExcel(ws, speciesColumn, catalysis, DIVISION):
     lipidName = list(catalysis.keys())[0]
     #print("Il nome del lipide e': ", lipidName)
 
@@ -73,11 +73,11 @@ def fixExcel(ws, speciesColumn, catalysis):
         if ws.cell(row=row, column=lipidKey).value is None:
             ws.cell(row=row, column=lipidKey).value = ws.cell(row=row+1, column=lipidKey).value*2
     
-    # Assegno i valori delle altre specie alle righe vuote appena create, ovvero il valore della riga successiva/0.35
+    # Assegno i valori delle altre specie alle righe vuote appena create, ovvero il valore della riga successiva/DIVISION
     for i in range(2, len(speciesColumn.items())-2):
         for row in range(2, ws.max_row + 1):
             if ws.cell(row=row, column=i+1).value is None:
-                ws.cell(row=row, column=i+1).value = int(ws.cell(row=row+1, column=i+1).value/0.35)
+                ws.cell(row=row, column=i+1).value = int(ws.cell(row=row+1, column=i+1).value/DIVISION)
 
     # Assegno i valori della riga vuota nella colonna "ABSOLUTE TIME"
     ws.cell(row=2, column=2).value = ws.cell(row=2, column=1).value
@@ -191,7 +191,22 @@ def main():
     COEFF = readCoeff() # al posto di VOL ci mettiam (COEFF*LIPIDE)
     GENERATIONS = readGenerations() + 1
     MAX_LIPID = readMaxLipid()
+    PROTO_TYPE = readProtoType()
+    VOLUME_PAR = readVolumePar()
+
+    if PROTO_TYPE == 1 or PROTO_TYPE == 2:
+        DIVISION = 0.5
+        LIPID_EXP = 1.0
+        VOLUME_PAR = 1.0
+
+    elif PROTO_TYPE == 3:
+        DIVISION = 0.35
+        LIPID_EXP = 1.5
     
+    elif PROTO_TYPE == 4:
+        DIVISION = 0.5
+        LIPID_EXP = 1.0
+
     SINTESI_FILE = readSynthesis()
     'output/sintesi.xlsx'
 
@@ -214,7 +229,7 @@ def main():
 
     # Inizializzo le liste e dizionari che conterranno tutte le informazioni lette da chimica.txt
     initialize(species, frequences, reactions, catalysis, events)
-    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, reactions, catalysis, events)
+    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events)
 
     # Creo il foglio dove scrivere i dati
     wb = Workbook()
@@ -257,7 +272,7 @@ def main():
         stopGeneration = False
         dummyValues = {} # Dizionario temporanea per salvare i valori delle specie
 
-        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, reactions, catalysis, events)
+        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events)
         
         os.system('cls' if os.name == 'nt' else 'clear')
         totalGenerations = genCounter + 1
@@ -360,7 +375,7 @@ def main():
     ws.cell(row=1, column=2, value="ABSOLUTE TIME")
 
     # Sistema le righe vuote e i valori delle specie
-    fixExcel(ws, speciesColumn, catalysis)
+    fixExcel(ws, speciesColumn, catalysis, DIVISION)
     colorCells(ws)
 
     sintesiList = []
@@ -432,7 +447,7 @@ def main():
         # Elimino l'ultima riga del file excel wb2
         ws2.delete_rows(ws2.max_row)
 
-    # Moltiplico le specie *0.35 e il lipide *2 in modo tale da avere i dati della protocellula genitrice
+    # Moltiplico le specie *DIVISION e il lipide *2 in modo tale da avere i dati della protocellula genitrice
     # Se si vogliono i dati della protocellula figlia allora commentare le righe qua sotto
     for i in range(2, ws2.max_row + 1):
         for j in range(2, ws2.max_column + 1):
@@ -441,7 +456,7 @@ def main():
                     if speciesColumn[j-1] == list(catalysis.keys())[0]:
                         ws2.cell(row=i, column=j).value = ws2.cell(row=i, column=j).value*2
                     else:
-                        ws2.cell(row=i, column=j).value = int(ws2.cell(row=i, column=j).value/0.35)
+                        ws2.cell(row=i, column=j).value = int(ws2.cell(row=i, column=j).value/DIVISION)
 
     # Salva il file excel coi risultati della sintesi
     wb2.save(SINTESI_FILE)

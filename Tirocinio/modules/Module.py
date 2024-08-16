@@ -30,7 +30,7 @@ def addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactio
             reactions.append(reaction)
 
 
-def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, reactions, catalysis, events):
+def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events):
     # Inizializzo il modello
     model = gillespy2.Model()
 
@@ -39,7 +39,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, r
     
     readSpecies = True  # Quanto incontrerò la riga che separa le specie dalle reazioni diventerà False
     reactionCounter = 0 # Conto le reazioni che vengono inserite dal file chimica.txt
-
+    reactionIndex = 0   # Indice della reazione che sto considerando
     counterSpecies = 0
     for line in lines: 
         columns = line.split('\t')                  # Divido la riga in colonne usando tab come separatore 
@@ -65,6 +65,9 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, r
         else:
             reactants = []
             products = []
+
+            reactionCreated = False # Se la reazione che incontro ha un numero come reagente, 
+                                    # creo le reazioni prima del dovuto e skippo la fase di creazione
 
             arrowFound = False      # Se ho trovato il carattere '>'
             semicolonFound = False  # Se ho trovato il carattere ';'
@@ -96,52 +99,142 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, r
             #   propensityFunction: e' la stringa che contiene la formula da inserire in propensityFunction e viene costruita a seconda
             #                       della reazione che consideriamo (vedi formule sopra)
             #   AGGIORNAMENTO 05-05-2024: Al posto di vol inserisco COEFF*lipidName
+            #   AGGIORNAMENTO 12-08-2024: Al posto di COEFF*lipidName inserisco COEFF*(lipidName^1.5)
 
             reactantsNumber = len(reactants)    
             propensityFunction = str(frequences[reactionCounter].name)
-
+            reactionCounter = reactionCounter + 1
             if reactantsNumber != 0:
                 
                 for i in reactants:
                     propensityFunction += "*" + str(i)
 
                 if reactantsNumber > 1:
+<<<<<<< HEAD
                     propensityFunction += "/(" + "(" + str(COEFF) + "*(" + str(lipidName) + "^1.5))"
 
                     for i in range(1, (reactantsNumber - 1)):
                         propensityFunction += "*" + "(" + str(COEFF) + "*(" + str(lipidName) + "^1.5))"
+=======
+                    propensityFunction += "/(" + "(" + str(COEFF) + "*(" + str(lipidName) + "^" + str(LIPID_EXP) + "))"
+
+                    for i in range(1, (reactantsNumber - 1)):
+                        propensityFunction += "*" + "(" + str(COEFF) + "*(" + str(lipidName) + "^" + str(LIPID_EXP) + "))"
+>>>>>>> 7fccdbad9945a1bdbe5fb506f877c07bb7ec4db7
 
                     propensityFunction += ")"
 
+                else:
+                    # Se la reazione ha un solo reagente e questo è un numero, creo 2 reazioni in una
+                    if reactants[0].isdigit():
+                        # Se la protocellula e' di tipo 1 o 2
+                        if PROTO_TYPE == 1 or PROTO_TYPE == 2:
+                            propensityFunction1 = propensityFunction
+                            propensityFunction2 = propensityFunction
+
+                            # Prima reazione (Creazione dal nulla)
+                            # propensityFunction1 += "*" + str(reactants[0]) + "*" + lipidName
+                            propensityFunction1 += "*" + lipidName
+                            reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                            reactants = {}, 
+                                                            products = {products[0]:1}, 
+                                                            propensity_function = propensityFunction1)
+                            
+                            reactions.append(reaction)
+                            reactionIndex = reactionIndex + 1
+
+                            # Seconda reazione (Scomparsa dal nulla)
+                            propensityFunction2 += "*" + str(products[0]) + "/" + str(VOLUME_PAR)
+                            reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                            reactants = {str(products[0]):1}, 
+                                                            products = {}, 
+                                                            propensity_function = propensityFunction2)
+                            
+                            reactions.append(reaction)
+                            reactionIndex = reactionIndex + 1
+                            reactionCreated = True
+
+                        # Se la protocellula e' di tipo 3
+                        elif PROTO_TYPE == 3:
+                            propensityFunction1 = propensityFunction
+                            propensityFunction2 = propensityFunction
+
+                            # Prima reazione (Creazione dal nulla)
+                            propensityFunction1 += "*" + str(reactants[0]) + "*" + lipidName
+                            reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                            reactants = {}, 
+                                                            products = {products[0]:1}, 
+                                                            propensity_function = propensityFunction1)
+                            
+                            model.add_reaction(reaction)
+                            reactionIndex = reactionIndex + 1
+
+                            # Seconda reazione (Scomparsa dal nulla) - VOLUME_PAR del params.txt
+                            propensityFunction2 += "*" + products[0] + "/(" + str(VOLUME_PAR) + "*(" + lipidName + "^0.5))"
+                            reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                            reactants = {products[0]:1}, 
+                                                            products = {}, 
+                                                            propensity_function = propensityFunction2)
+                            
+                            model.add_reaction(reaction)
+                            reactionIndex = reactionIndex + 1
+                            reactionCreated = True
+                        
+                        # Se la protocellula e' di tipo 4
+                        elif PROTO_TYPE == 4:
+                            propensityFunction1 = propensityFunction
+                            propensityFunction2 = propensityFunction
+
+                            # Prima reazione (Creazione dal nulla)
+                            propensityFunction1 += "*" + str(reactants[0]) + "*(" + lipidName + "^0.667)"
+                            reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                            reactants = {}, 
+                                                            products = {products[0]:1}, 
+                                                            propensity_function = propensityFunction1)
+                            
+                            model.add_reaction(reaction)
+                            reactionIndex = reactionIndex + 1
+
+                            # Seconda reazione (Scomparsa dal nulla) - VOLUME_PAR del params.txt
+                            propensityFunction2 += "*" + products[0] + "/(" + str(VOLUME_PAR) + "*(" + lipidName + "^0.333))"
+                            reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                            reactants = {products[0]:1}, 
+                                                            products = {}, 
+                                                            propensity_function = propensityFunction2)
+                            
+                            model.add_reaction(reaction)
+                            reactionIndex = reactionIndex + 1
+                            reactionCreated = True
+                        
             # Costruisco la reazione, con GillesPy2 non si può creare una reazione senza almeno un reagente o un prodotto
-            if reactants:
-                reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
-                                                reactants = {reactants[0]:1}, 
-                                                products = {}, 
-                                                propensity_function = propensityFunction)
-                reactants.pop(0)
+            if not reactionCreated:
+                if reactants:
+                    reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                    reactants = {reactants[0]:1}, 
+                                                    products = {}, 
+                                                    propensity_function = propensityFunction)
+                    reactants.pop(0)
 
-            elif products:
-                reaction = gillespy2.Reaction(  name = 'r' + str(reactionCounter), 
-                                                reactants = {}, 
-                                                products = {products[0]:1}, 
-                                                propensity_function = propensityFunction)
-                products.pop(0)
-            
-            for i in reactants:
-                reaction.add_reactant(species=i, stoichiometry=1)
-            for i in products:
-                reaction.add_product(species=i, stoichiometry=1)
+                elif products:
+                    reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
+                                                    reactants = {}, 
+                                                    products = {products[0]:1}, 
+                                                    propensity_function = propensityFunction)
+                    products.pop(0)
+                
+                for i in reactants:
+                    reaction.add_reactant(species=i, stoichiometry=1)
+                for i in products:
+                    reaction.add_product(species=i, stoichiometry=1)
 
-            #print(reaction)
-            reactions.append(reaction)
-            reactionCounter = reactionCounter + 1
+                #print(reaction)
+                reactions.append(reaction)
+                reactionIndex = reactionIndex + 1
 
     species.append(gillespy2.Species(name = "tempo", initial_value = 0))    # Aggiungo la specie tempo all'ambiente
-    
+
     model.add_species(species)
     model.add_reaction(reactions)
-    
     addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactions)    # Aggiungo le reazioni di catalisi
     model.add_parameter(frequences)
 
@@ -157,9 +250,9 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, species, frequences, r
     events.append(evento)
     #print(evento)
 
-    # Con questo ciclo for simulo l'avvenimento di una divisione dividendo tutte le specie per 0.35
+    # Con questo ciclo for simulo l'avvenimento di una divisione dividendo tutte le specie per DIVISION
     for species_name in list(catalysis.keys())[1:]:
-        evento = gillespy2.EventAssignment(variable = species_name, expression = f"{species_name}*0.35")
+        evento = gillespy2.EventAssignment(variable = species_name, expression = f"{species_name}*"+ str(DIVISION))
         events.append(evento)
         #print(evento)
     
