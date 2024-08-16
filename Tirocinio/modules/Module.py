@@ -33,7 +33,6 @@ def addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactio
 def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events):
     # Inizializzo il modello
     model = gillespy2.Model()
-
     with open(INPUT_FILE, 'r') as file:
         lines = file.readlines()
     
@@ -41,7 +40,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
     reactionCounter = 0 # Conto le reazioni che vengono inserite dal file chimica.txt
     reactionIndex = 0   # Indice della reazione che sto considerando
     counterSpecies = 0
-    for line in lines: 
+    for line in lines:
         columns = line.split('\t')                  # Divido la riga in colonne usando tab come separatore 
         columns = [col.strip() for col in columns]  # Rimuovo i caratteri di inizio/fine riga
 
@@ -65,9 +64,6 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
         else:
             reactants = []
             products = []
-
-            reactionCreated = False # Se la reazione che incontro ha un numero come reagente, 
-                                    # creo le reazioni prima del dovuto e skippo la fase di creazione
 
             arrowFound = False      # Se ho trovato il carattere '>'
             semicolonFound = False  # Se ho trovato il carattere ';'
@@ -104,6 +100,14 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
             reactantsNumber = len(reactants)    
             propensityFunction = str(frequences[reactionCounter].name)
             reactionCounter = reactionCounter + 1
+            reactionCreated = False # Se la reazione che incontro ha un numero come reagente, 
+                                    # creo le reazioni prima del dovuto e skippo la fase di creazione
+            # stampo la reazione
+            print("REACTION: ", reactants, " > ", products, " ; ", frequence)
+            print("SPECIES: ")
+            for i in species:
+                print(i.name, i.initial_value)
+            input()
             if reactantsNumber != 0:
                 
                 for i in reactants:
@@ -269,5 +273,5 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
     model.timespan(tspan)
 
     #outputData(species, catalysis)
-
+    input("Fine protocellula zero")
     return model

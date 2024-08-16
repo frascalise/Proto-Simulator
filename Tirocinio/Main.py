@@ -230,7 +230,7 @@ def main():
     # Inizializzo le liste e dizionari che conterranno tutte le informazioni lette da chimica.txt
     initialize(species, frequences, reactions, catalysis, events)
     model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events)
-
+    print("Modello creato con successo!\n")
     # Creo il foglio dove scrivere i dati
     wb = Workbook()
     ws = wb.active
