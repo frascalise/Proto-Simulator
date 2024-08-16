@@ -102,12 +102,6 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
             reactionCounter = reactionCounter + 1
             reactionCreated = False # Se la reazione che incontro ha un numero come reagente, 
                                     # creo le reazioni prima del dovuto e skippo la fase di creazione
-            # stampo la reazione
-            print("REACTION: ", reactants, " > ", products, " ; ", frequence)
-            print("SPECIES: ")
-            for i in species:
-                print(i.name, i.initial_value)
-            input()
             if reactantsNumber != 0:
                 
                 for i in reactants:
@@ -273,5 +267,4 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
     model.timespan(tspan)
 
     #outputData(species, catalysis)
-    input("Fine protocellula zero")
     return model
