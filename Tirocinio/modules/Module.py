@@ -105,7 +105,8 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
             if reactantsNumber != 0:
                 
                 for i in reactants:
-                    propensityFunction += "*" + str(i)
+                    if not i.isdigit(): # Nel caso 10 > A ; k1, 10 non va inserito nella propensity function
+                        propensityFunction += "*" + str(i)
 
                 if reactantsNumber > 1:
                     propensityFunction += "/(" + "(" + str(COEFF) + "*(" + str(lipidName) + "^" + str(LIPID_EXP) + "))"
