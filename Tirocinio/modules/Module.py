@@ -110,17 +110,10 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
                     propensityFunction += "*" + str(i)
 
                 if reactantsNumber > 1:
-<<<<<<< HEAD
-                    propensityFunction += "/(" + "(" + str(COEFF) + "*(" + str(lipidName) + "^1.5))"
-
-                    for i in range(1, (reactantsNumber - 1)):
-                        propensityFunction += "*" + "(" + str(COEFF) + "*(" + str(lipidName) + "^1.5))"
-=======
                     propensityFunction += "/(" + "(" + str(COEFF) + "*(" + str(lipidName) + "^" + str(LIPID_EXP) + "))"
 
                     for i in range(1, (reactantsNumber - 1)):
                         propensityFunction += "*" + "(" + str(COEFF) + "*(" + str(lipidName) + "^" + str(LIPID_EXP) + "))"
->>>>>>> 7fccdbad9945a1bdbe5fb506f877c07bb7ec4db7
 
                     propensityFunction += ")"
 

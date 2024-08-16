@@ -1,0 +1,26 @@
+L	300	0								
+A	10	0								
+B	10	0								
+C	10	0								
+D	10	0								
+AB	10	0.05								
+BA	10	0.05								
+CD	10	0.05								
+DC	10	0.05								
+CDA	10	0.05
+BAB	10	0.05
+
+	>	A	;	1.0
+	>	B	;	1.0
+	>	C	;	1.0
+	>	D	;	1.0
+A	>	;	0.01
+B	>	;	0.01
+C	>	;	0.01
+D	>	;	0.01
+B	+	A	+	AB	>	BA	+	AB	;	2.0
+A	+	B	+	BA	>	AB	+	BA	;	2.0
+CD	+	A	+	AB	>	CDA	+	AB	;	8.0
+D	+	C	+	CD	>	DC	+	CD	;	2.0
+C	+	D	+	DC	>	CD	+	DC	;	2.0
+BA	+	B	+	DC	>	BAB	+	DC	;	8.0
