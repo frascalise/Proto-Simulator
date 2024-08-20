@@ -192,12 +192,10 @@ def main():
     GENERATIONS = readGenerations() + 1
     MAX_LIPID = readMaxLipid()
     PROTO_TYPE = readProtoType()
-    VOLUME_PAR = readVolumePar()
 
     if PROTO_TYPE == 1 or PROTO_TYPE == 2:
         DIVISION = 0.5
         LIPID_EXP = 1.0
-        VOLUME_PAR = 1.0
 
     elif PROTO_TYPE == 3:
         DIVISION = 0.35
@@ -209,7 +207,7 @@ def main():
 
     SINTESI_FILE = readSynthesis()
     'output/sintesi.xlsx'
-
+    
     oldFile = INPUT_FILE    # Salva il file di input originale
 
     print("INPUT: ", INPUT_FILE)
@@ -229,7 +227,7 @@ def main():
 
     # Inizializzo le liste e dizionari che conterranno tutte le informazioni lette da chimica.txt
     initialize(species, frequences, reactions, catalysis, events)
-    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events)
+    model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events)
     # Creo il foglio dove scrivere i dati
     wb = Workbook()
     ws = wb.active
@@ -271,7 +269,7 @@ def main():
         stopGeneration = False
         dummyValues = {} # Dizionario temporanea per salvare i valori delle specie
 
-        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events)
+        model = protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events)
         
         os.system('cls' if os.name == 'nt' else 'clear')
         totalGenerations = genCounter + 1

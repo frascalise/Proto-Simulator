@@ -120,18 +120,6 @@ def readProtoType():
                 parameter_type, parameter_value = columns
                 if parameter_type == "PROTO_TYPE":
                     return int(parameter_value)
-                
-def readVolumePar():
-    with open("input/AngularParams.txt", "r") as file:
-        for line in file:
-            columns = line.split('\t')
-            columns = [col.strip() for col in columns]
-
-            if len(columns) == 2:
-                parameter_type, parameter_value = columns
-                if parameter_type == "VOLUME_PAR":
-                    return float(parameter_value)
-
 
 def quotes():
     quotes = [

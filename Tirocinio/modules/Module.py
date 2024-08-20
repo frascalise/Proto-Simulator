@@ -19,18 +19,18 @@ def outputData(species, catalysis):
 def addCatalysisReactions(model, catalysis, frequences, reactionCounter, reactions):
     for species_name, catalysis_value in catalysis.items():
         if float(catalysis_value) > 0:
-            frequences.append(gillespy2.Parameter(name = 'k' + str(reactionCounter), expression = 1))
+            frequences.append(gillespy2.Parameter(name = 'k' + str(reactionCounter), expression = str(float(catalysis_value))))
             reaction = gillespy2.Reaction(  name = 'catalysis_' + species_name,
                                             reactants = {species_name: 1},
                                             products = {species_name: 1, list(catalysis.keys())[0]: 1},
-                                            propensity_function = str(float(catalysis_value)) + "*" + species_name + "*" + str(frequences[reactionCounter].name))
+                                            propensity_function = species_name + "*" + str(frequences[reactionCounter].name))
             reactionCounter = reactionCounter + 1
             #print(reaction)
             model.add_reaction(reaction)
             reactions.append(reaction)
 
 
-def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events):
+def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, DIVISION, LIPID_EXP, species, frequences, reactions, catalysis, events):
     # Inizializzo il modello
     model = gillespy2.Model()
     with open(INPUT_FILE, 'r') as file:
@@ -125,8 +125,8 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
                             propensityFunction2 = propensityFunction
 
                             # Prima reazione (Creazione dal nulla)
-                            # propensityFunction1 += "*" + str(reactants[0]) + "*" + lipidName
-                            propensityFunction1 += "*" + lipidName
+                            # propensityFunction1 += "*" + lipidName
+                            propensityFunction1 += "*" + str(reactants[0]) + "*" + lipidName
                             reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
                                                             reactants = {}, 
                                                             products = {products[0]:1}, 
@@ -136,7 +136,7 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
                             reactionIndex = reactionIndex + 1
 
                             # Seconda reazione (Scomparsa dal nulla)
-                            propensityFunction2 += "*" + str(products[0]) + "/" + str(VOLUME_PAR)
+                            propensityFunction2 += "*" + str(products[0]) + "/" + str(COEFF)
                             reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
                                                             reactants = {str(products[0]):1}, 
                                                             products = {}, 
@@ -158,17 +158,17 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
                                                             products = {products[0]:1}, 
                                                             propensity_function = propensityFunction1)
                             
-                            model.add_reaction(reaction)
+                            reactions.append(reaction)
                             reactionIndex = reactionIndex + 1
 
-                            # Seconda reazione (Scomparsa dal nulla) - VOLUME_PAR del params.txt
-                            propensityFunction2 += "*" + products[0] + "/(" + str(VOLUME_PAR) + "*(" + lipidName + "^0.5))"
+                            # Seconda reazione (Scomparsa dal nulla) - COEFF del params.txt
+                            propensityFunction2 += "*" + products[0] + "/(" + str(COEFF) + "*(" + lipidName + "^0.5))"
                             reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
                                                             reactants = {products[0]:1}, 
                                                             products = {}, 
                                                             propensity_function = propensityFunction2)
                             
-                            model.add_reaction(reaction)
+                            reactions.append(reaction)
                             reactionIndex = reactionIndex + 1
                             reactionCreated = True
                         
@@ -184,17 +184,17 @@ def protoZero(INPUT_FILE, TIME, POINTS, COEFF, MAX_LIPID, PROTO_TYPE, VOLUME_PAR
                                                             products = {products[0]:1}, 
                                                             propensity_function = propensityFunction1)
                             
-                            model.add_reaction(reaction)
+                            reactions.append(reaction)
                             reactionIndex = reactionIndex + 1
 
-                            # Seconda reazione (Scomparsa dal nulla) - VOLUME_PAR del params.txt
-                            propensityFunction2 += "*" + products[0] + "/(" + str(VOLUME_PAR) + "*(" + lipidName + "^0.333))"
+                            # Seconda reazione (Scomparsa dal nulla) - COEFF del params.txt
+                            propensityFunction2 += "*" + products[0] + "/(" + str(COEFF) + "*(" + lipidName + "^0.333))"
                             reaction = gillespy2.Reaction(  name = 'r' + str(reactionIndex), 
                                                             reactants = {products[0]:1}, 
                                                             products = {}, 
                                                             propensity_function = propensityFunction2)
                             
-                            model.add_reaction(reaction)
+                            reactions.append(reaction)
                             reactionIndex = reactionIndex + 1
                             reactionCreated = True
                         
