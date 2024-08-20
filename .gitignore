@@ -4,3 +4,4 @@ input/
 output/
 .vscode/
 Tirocinio/TODO.MD
+Tirocinio/modules/__pycache__/
