@@ -121,6 +121,29 @@ def readProtoType():
                 if parameter_type == "PROTO_TYPE":
                     return int(parameter_value)
 
+def readRho():
+    with open("input/params.txt", "r") as file:
+        for line in file:
+            columns = line.split('\t')
+            columns = [col.strip() for col in columns]
+
+            if len(columns) == 2:
+                parameter_type, parameter_value = columns
+                if parameter_type == "RHO":
+                    return float(parameter_value)
+
+def readDelta():
+    with open("input/params.txt", "r") as file:
+        for line in file:
+            columns = line.split('\t')
+            columns = [col.strip() for col in columns]
+
+            if len(columns) == 2:
+                parameter_type, parameter_value = columns
+                if parameter_type == "DELTA":
+                    return float(parameter_value)
+
+
 def quotes():
     quotes = [
         "Science is organised knowledge. Wisdom is organised life.",
