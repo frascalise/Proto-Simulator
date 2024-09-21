@@ -1,4 +1,4 @@
-INPUT	chimica3.txt
+INPUT	chimica1.txt
 OUTPUT	output.xlsx
 SYNTHESIS	sintesi.xlsx
 TIME	8000
