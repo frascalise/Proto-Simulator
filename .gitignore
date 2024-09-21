@@ -1,9 +1,14 @@
-.DS_Store
-*/__pycache__/
+# Lascio solo i file dei parametri
 /input/*
 !/input/params.txt
 !/input/AngularParams.txt
-output/
+
+# Creo la cartella output
+/output/*
+!/output/output.md
+
+.DS_Store
+*/__pycache__/
 .vscode/
 TODO.MD
 modules/__pycache__/
